@@ -1,36 +1,41 @@
 package cs.washington.mobileocr;
 
-import java.util.HashMap;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector.OnGestureListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.tts.TextToSpeechBeta;
 import com.google.tts.TextToSpeechBeta.OnInitListener;
 
-public class MobileOCR extends Activity implements OnInitListener, OnGestureListener, OnUtteranceCompletedListener{
+/*
+ * Team Sparkplugs (Josh Scotland and Hussein Yapit)
+ * This is the main activity for the MobileOCR application.
+ * The application uses text to speech to output information
+ * TODO Add more comments
+ * TODO: Add logs  Log.e("MOCR","Stop Activity");
+ * TODO Make the long press be "continue play" NEEDS TIMERS
+ * TODO Add the left and right swipes to scroll by word
+ */
 
-	public EditText entry;
+public class MobileOCR extends Activity implements OnInitListener, OnGestureListener {
+
 	private TextToSpeechBeta mTts;
-	public String passedString2 = "These are the instructions. First hit the button that says push first! This parses the paragraph into sentences. Now tap the screen to play and pause the speech. Swipe up and down to change sentences.";
+	private String passedString = "These are the instructions. First hit the button that says push first! " +
+			"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
+			"Swipe up and down to change sentences.";
 	private int MY_DATA_CHECK_CODE;
-	int count = 0;
-	HashMap<String, String> mHash = new HashMap<String, String>();
-	String[] tokens;
+	private int textArrayCount = -1;
+	private int wordArrayCount = -1;
+	private String[] textArray;
+	private String[] wordArray;
 
-	//TODO: Add logs  Log.e("MOCR","Stop Activity");
-	//TODO: Add comments
-
-	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
@@ -38,7 +43,8 @@ public class MobileOCR extends Activity implements OnInitListener, OnGestureList
 		final Button speak2 = (Button) findViewById(R.id.speak2);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				screenReader(passedString2);
+				textArray = TextParser.textParse(passedString);
+				textArrayCount = 0;
 			}
 		});
 
@@ -47,7 +53,7 @@ public class MobileOCR extends Activity implements OnInitListener, OnGestureList
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 
 		TextView text = (TextView) findViewById(R.id.text);
-		text.setText(passedString2);
+		text.setText(passedString);
 
 		gestureScanner = new GestureDetector(this);
 	}
@@ -98,33 +104,13 @@ public class MobileOCR extends Activity implements OnInitListener, OnGestureList
 		mTts.speak("Welcome to the Mobile OCR user interface!", 0, null);
 	}
 
-	private void screenReader(String passedString) {
-		String delims = "[.?!]+";
-		tokens = passedString.split(delims);
-		mTts.setOnUtteranceCompletedListener(this);
-		count = 0;
-		/*
-		while (count != tokens.length - 1) {
-			mTts.speak(tokens[count], TextToSpeechBeta.QUEUE_ADD, null);
-			count++;
-		}
-		
-		mHash.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "end");
-		mTts.speak(tokens[count], TextToSpeechBeta.QUEUE_ADD, mHash);
-		*/
-	}
-
-	@Override
-	public void onUtteranceCompleted(String uttId) {
-		if (uttId == "end") {
-			mTts.speak("Utterance Complete", TextToSpeechBeta.QUEUE_ADD, mHash);
-		} 
-	}
-
+	/*
+	 * The rest of the code is gesture detection for screen reading
+	 */
+	
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-	private static final int SWIPE_THRESHOLD_VERTICAL_CORRECTION = 50;
 	private GestureDetector gestureScanner;
 
 	@Override
@@ -143,29 +129,29 @@ public class MobileOCR extends Activity implements OnInitListener, OnGestureList
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
 			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-				Toast.makeText(getApplicationContext(), "Left Swipe, Count = " + count, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Left Swipe, textArrayCount = " + textArrayCount, Toast.LENGTH_SHORT).show();
 			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-				Toast.makeText(getApplicationContext(), "Right Swipe, Count = " + count, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Right Swipe, textArrayCount = " + textArrayCount, Toast.LENGTH_SHORT).show();
 			}
-			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY - SWIPE_THRESHOLD_VERTICAL_CORRECTION) {
-				Toast.makeText(getApplicationContext(), "Swipe up, Count = " + count, Toast.LENGTH_SHORT).show();
-				if (count > 0) {
+			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+				Toast.makeText(getApplicationContext(), "Swipe up, textArrayCount = " + textArrayCount, Toast.LENGTH_SHORT).show();
+				if (textArrayCount > 0) {
 					mTts.stop();
-					count--;
-					mTts.speak(tokens[count], TextToSpeechBeta.QUEUE_ADD, null);
+					textArrayCount--;
+					mTts.speak(textArray[textArrayCount], TextToSpeechBeta.QUEUE_ADD, null);
 				}
-				else { //count == 0
-					mTts.speak(tokens[0], TextToSpeechBeta.QUEUE_ADD, null);
+				else { //textArrayCount == 0
+					mTts.speak(textArray[0], TextToSpeechBeta.QUEUE_ADD, null);
 				}
-			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY - SWIPE_THRESHOLD_VERTICAL_CORRECTION) {
-				Toast.makeText(getApplicationContext(), "Swipe down, Count = " + count, Toast.LENGTH_SHORT).show();
-				if (count < tokens.length - 1) {
+			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+				Toast.makeText(getApplicationContext(), "Swipe down, textArrayCount = " + textArrayCount, Toast.LENGTH_SHORT).show();
+				if (textArrayCount < textArray.length - 1) {
 					mTts.stop();
-					count++;
-					mTts.speak(tokens[count], TextToSpeechBeta.QUEUE_ADD, null);
+					textArrayCount++;
+					mTts.speak(textArray[textArrayCount], TextToSpeechBeta.QUEUE_ADD, null);
 				}
 				else {
-					mTts.speak(tokens[tokens.length], TextToSpeechBeta.QUEUE_ADD, null);
+					mTts.speak(textArray[textArray.length], TextToSpeechBeta.QUEUE_ADD, null);
 				}
 			}
 		} catch (Exception e) {
@@ -187,18 +173,17 @@ public class MobileOCR extends Activity implements OnInitListener, OnGestureList
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-
 	} 
 
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
-		Toast mToast = Toast.makeText(getApplicationContext(), "Single Tap, Count = " + count, Toast.LENGTH_SHORT);
+		Toast mToast = Toast.makeText(getApplicationContext(), "Single Tap, textArrayCount = " + textArrayCount, Toast.LENGTH_SHORT);
         mToast.show();
 		if (mTts.isSpeaking())
 			mTts.stop();
-		else if (count < tokens.length) {
-			mTts.speak(tokens[count], TextToSpeechBeta.QUEUE_ADD, null);
-			count++;
+		else if (textArrayCount > -1 && textArrayCount < textArray.length) {
+			mTts.speak(textArray[textArrayCount], TextToSpeechBeta.QUEUE_ADD, null);
+			textArrayCount++;
 		}
 		else {
 			
