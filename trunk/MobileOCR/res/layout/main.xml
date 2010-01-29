@@ -3,23 +3,10 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-<TextView  
-		android:id="@+id/title" 
-    	android:layout_width="fill_parent" 
-    	android:layout_height="wrap_content" 
-    	android:text="ScreenReader Ultra Edition"
-    />
         
-    
-      <TextView 
-      android:text="@+id/text" 
-      android:id="@+id/text" 
-      android:layout_width="wrap_content" 
-      android:layout_height="wrap_content">
-      </TextView>
       <Button 
-      android:text="PUSH FIRST: it parses the text for screen reading" 
-      android:id="@+id/speak2" 
+      android:text="Go into screen reader" 
+      android:id="@+id/go" 
       android:layout_width="wrap_content" 
       android:layout_height="wrap_content">
       </Button>
