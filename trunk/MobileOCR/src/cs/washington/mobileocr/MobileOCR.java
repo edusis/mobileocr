@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.GestureDetector.OnGestureListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.tts.TextToSpeechBeta;
 import com.google.tts.TextToSpeechBeta.OnInitListener;
@@ -25,22 +26,22 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
 
 public class MobileOCR extends Activity implements OnGestureListener, OnInitListener {
 
-	private TextToSpeechBeta mTts;
-	private String passedString = "These are the instructions. First hit the button that says push first! " +
-	"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
-	"Swipe up and down to change sentences";
+	private static TextToSpeechBeta mTts;
+	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
+		MobileOCR.setPassedString("These are the instructions. First hit the button that says push first! " +
+				"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
+				"Swipe up and down to change sentences");
 		final Button speak2 = (Button) findViewById(R.id.go);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				Intent myIntent = new Intent(v.getContext(), ScreenReader.class);
                 //startActivityForResult(myIntent, 0);
-				myIntent.putExtra("Str1", passedString);
+				myIntent.putExtra("Str1", getPassedString());
 				startActivity(myIntent);
 			}
 		});
@@ -50,6 +51,9 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 
 		gestureScanner = new GestureDetector(this);
+		
+		TextView text = (TextView) findViewById(R.id.text);
+        text.setText(passedString);
 	}
 
 	//TODO: Better activity management
@@ -65,13 +69,13 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 
 	@Override
 	public void onStop() {
-		mTts.shutdown();
+		getmTts().shutdown();
 		super.onDestroy();
 	}
 
 	@Override
 	public void onDestroy() {
-		mTts.shutdown();
+		getmTts().shutdown();
 		super.onDestroy();
 	}
 
@@ -81,7 +85,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		if (requestCode == MY_DATA_CHECK_CODE) {
 			if (resultCode == TextToSpeechBeta.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
-				mTts = new TextToSpeechBeta(this, this);
+				setmTts(new TextToSpeechBeta(this, this));
 			} else {
 				// missing data, install it
 				Intent installIntent = new Intent();
@@ -95,7 +99,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	@Override
 	public void onInit(int arg0, int arg1) {
 		Log.i("MOCR","TTS Initialization");
-		mTts.speak("Welcome to the Mobile OCR user interface!", 0, null);
+		getmTts().speak("Welcome to the Mobile OCR user interface!", 0, null);
 	}
 
 	/*
@@ -160,5 +164,19 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		return true;
 	}
 
+	public void setmTts(TextToSpeechBeta mTts) {
+		MobileOCR.mTts = mTts;
+	}
 
+	public static TextToSpeechBeta getmTts() {
+		return mTts;
+	}
+
+	public static void setPassedString(String passedString) {
+		MobileOCR.passedString = passedString;
+	}
+
+	public static String getPassedString() {
+		return passedString;
+	}
 }
