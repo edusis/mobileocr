@@ -10,7 +10,7 @@ public class TextParser {
 	/* 
 	 * Given sentences, will parse them.
 	 */
-	public static String[] textParse(String passedString) {
+	public static String[] sentenceParse(String passedString) {
 		String delims = "[.?!]+";
 		String[] tokens = passedString.split(delims);
 		return tokens;
@@ -19,7 +19,7 @@ public class TextParser {
 	/*
 	 * Given a sentence, will parse out the words
 	 */
-	public static String[] sentenceParse(String passedString) {
+	public static String[] wordParse(String passedString) {
 		String delims = "[ ]+";
 		String[] tokens = passedString.split(delims);
 		return tokens;

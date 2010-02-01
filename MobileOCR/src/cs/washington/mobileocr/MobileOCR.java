@@ -23,9 +23,13 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
  * TODO Add the left and right swipes to scroll by word
  */
 
-public class MobileOCR extends Activity implements OnGestureListener {
+public class MobileOCR extends Activity implements OnGestureListener, OnInitListener {
 
 	private TextToSpeechBeta mTts;
+	private String passedString = "These are the instructions. First hit the button that says push first! " +
+	"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
+	"Swipe up and down to change sentences";
+	private int MY_DATA_CHECK_CODE;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,18 +39,17 @@ public class MobileOCR extends Activity implements OnGestureListener {
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				Intent myIntent = new Intent(v.getContext(), ScreenReader.class);
-                startActivityForResult(myIntent, 0);
+                //startActivityForResult(myIntent, 0);
+				myIntent.putExtra("Str1", passedString);
+				startActivity(myIntent);
 			}
 		});
 		
-		/*
 		Intent checkIntent = new Intent();
 		checkIntent.setAction(TextToSpeechBeta.Engine.ACTION_CHECK_TTS_DATA);
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
-		*/
 
 		gestureScanner = new GestureDetector(this);
-		mTts = new TextToSpeechBeta(this, ttsInitListener);
 	}
 
 	//TODO: Better activity management
@@ -72,7 +75,6 @@ public class MobileOCR extends Activity implements OnGestureListener {
 		super.onDestroy();
 	}
 
-	/*
 	//TTS initialization
 	protected void onActivityResult(
 			int requestCode, int resultCode, Intent data) {
@@ -89,21 +91,12 @@ public class MobileOCR extends Activity implements OnGestureListener {
 			}
 		}
 	}
-	*/
 
-	/*
 	@Override
 	public void onInit(int arg0, int arg1) {
 		Log.i("MOCR","TTS Initialization");
 		mTts.speak("Welcome to the Mobile OCR user interface!", 0, null);
 	}
-	*/
-	
-	private OnInitListener ttsInitListener = new OnInitListener() {
-		public void onInit(int arg0, int arg1) {
-			mTts.speak("Welcome to the Mobile OCR user interface!", 0, null);
-		}
-	};
 
 	/*
 	 * The rest of the code is gesture detection for screen reading

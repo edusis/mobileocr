@@ -11,7 +11,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-		<activity android:name=".ScreenReader"></activity>
+		<activity android:name=".ScreenReader"
+		android:theme="@android:style/Theme.Translucent" ></activity>
     </application>
     <uses-sdk android:minSdkVersion="4" />
 
