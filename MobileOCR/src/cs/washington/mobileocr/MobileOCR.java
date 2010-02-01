@@ -39,6 +39,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		final Button speak2 = (Button) findViewById(R.id.go);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				mTts.stop();
 				Intent myIntent = new Intent(v.getContext(), ScreenReader.class);
                 //startActivityForResult(myIntent, 0);
 				myIntent.putExtra("Str1", getPassedString());

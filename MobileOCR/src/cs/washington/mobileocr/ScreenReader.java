@@ -25,12 +25,15 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	private String[] wordArray;
 	private int mode = 0;
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
+	private int[] wordsInSentences;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screenreader);
 		
 		sentenceArray = TextParser.sentenceParse(MobileOCR.getPassedString());
+		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
+		Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at 0 = " + wordsInSentences[0], Toast.LENGTH_SHORT).show();
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
 		
 		gestureScanner = new GestureDetector(this);
@@ -97,6 +100,17 @@ public class ScreenReader extends Activity implements OnGestureListener {
 					else 
 						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 				}
+				else if (mode == 1) {
+					if (loc[1] > 0) {
+						loc[1]--;
+						MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
+					}
+					else 
+						MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
+				}
+				else {
+					
+				}
 			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
 				//Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
 				if (mode == 0) {
@@ -106,6 +120,17 @@ public class ScreenReader extends Activity implements OnGestureListener {
 					}
 					else 
 						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
+				}
+				else if (mode == 1) {
+					if (loc[1] < wordArray.length) {
+						loc[1]++;
+						MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
+					}
+					else 
+						MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
+				}
+				else {
+					
 				}
 			}
 			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
@@ -148,7 +173,11 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		if (MobileOCR.getmTts().isSpeaking())
 			MobileOCR.getmTts().stop();
 		else {
-			
+			/*
+			for (int i = 0; i < 8; i++) {
+				MobileOCR.getmTts().speak(wordArray[i + 4], TextToSpeechBeta.QUEUE_ADD, null);
+			}
+			*/
 		}
 		return true;
 	}

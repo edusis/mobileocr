@@ -8,7 +8,7 @@ package cs.washington.mobileocr;
 public class TextParser {
 	
 	/* 
-	 * Given sentences, will parse them.
+	 * Parses a block of text into sentences by the punctuation
 	 */
 	public static String[] sentenceParse(String passedString) {
 		String delims = "[.?!]+";
@@ -17,11 +17,20 @@ public class TextParser {
 	}
 	
 	/*
-	 * Given a sentence, will parse out the words
+	 * Parses a block of text into words by the spaces
 	 */
 	public static String[] wordParse(String passedString) {
 		String delims = "[ ]+";
 		String[] tokens = passedString.split(delims);
 		return tokens;
+	}
+	
+	public static int[] countWordsInSentence(String[] passedSentences) {
+		String delims = "[ ]+";
+		int[] wordsInSentence = new int[passedSentences.length];
+		for (int i = 0; i < wordsInSentence.length; i++) {
+			wordsInSentence[i] = passedSentences[i].split(delims).length;
+		}
+		return wordsInSentence;
 	}
 }
