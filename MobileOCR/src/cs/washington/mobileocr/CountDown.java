@@ -15,7 +15,7 @@ public class CountDown extends CountDownTimer{
 
 	@Override
 	public void onTick(long millisUntilFinished) {
-		
+		//MobileOCR.getmTts().speak("hey", 0, null);
 	}
 
 }

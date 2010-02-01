@@ -1,17 +1,12 @@
 package cs.washington.mobileocr;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.GestureDetector.OnGestureListener;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.google.tts.TextToSpeechBeta;
-import com.google.tts.TextToSpeechBeta.OnInitListener;
 
 /*
  * Team Sparkplugs (Josh Scotland and Hussein Yapit)
@@ -24,11 +19,6 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
  */
 
 public class ScreenReader extends Activity implements OnGestureListener {
-
-	private TextToSpeechBeta mTts;
-	private String passedString = "These are the instructions. First hit the button that says push first! " +
-			"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
-			"Swipe up and down to change sentences";
 	
 	private int[] loc = {0,0,0};  // Sentence number, word number, letter number
 	private String[] sentenceArray;
@@ -40,40 +30,14 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screenreader);
 		
-		sentenceArray = TextParser.sentenceParse(passedString);
-		wordArray = TextParser.wordParse(passedString);
-
-		final Button speak2 = (Button) findViewById(R.id.speak2);
-		speak2.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				loc[0] = loc[1] = loc[2] = 0;
-			}
-		});
+		sentenceArray = TextParser.sentenceParse(MobileOCR.getPassedString());
+		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
 		
-		final Button back = (Button) findViewById(R.id.back);
-		back.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-                Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
-                finish();
-			}
-		});
-		
-		TextView text = (TextView) findViewById(R.id.text);
-        text.setText(passedString);
-
 		gestureScanner = new GestureDetector(this);
-		mTts = new TextToSpeechBeta(this, ttsInitListener);
 		
 		CountDown counter = new CountDown(5000,1000);
 		//counter.start();
 	}
-	
-	private OnInitListener ttsInitListener = new OnInitListener() {
-		public void onInit(int arg0, int arg1) {
-			
-		}
-	};
 
 	//TODO: Better activity management
 	@Override
@@ -88,13 +52,13 @@ public class ScreenReader extends Activity implements OnGestureListener {
 
 	@Override
 	public void onStop() {
-		mTts.shutdown();
+		MobileOCR.getmTts().shutdown();
 		super.onDestroy();
 	}
 
 	@Override
 	public void onDestroy() {
-		mTts.shutdown();
+		MobileOCR.getmTts().shutdown();
 		super.onDestroy();
 	}
 
@@ -119,7 +83,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			mTts.stop();
+			MobileOCR.getmTts().stop();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
 			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
@@ -128,30 +92,33 @@ public class ScreenReader extends Activity implements OnGestureListener {
 				if (mode == 0) {
 					if (loc[0] > 0) {
 						loc[0]--;
-						mTts.speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
+						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 					}
 					else 
-						mTts.speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
+						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 				}
 			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
 				//Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
 				if (mode == 0) {
 					if (loc[0] < sentenceArray.length) {
 						loc[0]++;
-						mTts.speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
+						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 					}
 					else 
-						mTts.speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
+						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 				}
 			}
 			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
 				//Toast.makeText(getApplicationContext(), "Swipe up, mode = " + mode, Toast.LENGTH_SHORT).show();
+				if (mode == 0)
+					mode = 3;
 				mode = (mode - 1) % 3;
-				mTts.speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, null);
+				Toast.makeText(getApplicationContext(), "Swipe up, mode = " + mode, Toast.LENGTH_SHORT).show();
+				MobileOCR.getmTts().speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, null);
 			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
 				//Toast.makeText(getApplicationContext(), "Swipe down, mode = " + mode, Toast.LENGTH_SHORT).show();
 				mode = (mode + 1) % 3;
-				mTts.speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, null);
+				MobileOCR.getmTts().speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 		} catch (Exception e) {
 			// nothing
@@ -178,8 +145,8 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	public boolean onSingleTapUp(MotionEvent e) {
 		//Toast mToast = Toast.makeText(getApplicationContext(), "Single Tap, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT);
         //mToast.show();
-		if (mTts.isSpeaking())
-			mTts.stop();
+		if (MobileOCR.getmTts().isSpeaking())
+			MobileOCR.getmTts().stop();
 		else {
 			
 		}
