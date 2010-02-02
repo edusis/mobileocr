@@ -11,7 +11,7 @@ public class TextParser {
 	 * Parses a block of text into sentences by the punctuation
 	 */
 	public static String[] sentenceParse(String passedString) {
-		String delims = "[.?!]+";
+		String delims = "[.?!,]+";
 		String[] tokens = passedString.split(delims);
 		return tokens;
 	}
@@ -27,9 +27,11 @@ public class TextParser {
 	
 	public static int[] countWordsInSentence(String[] passedSentences) {
 		String delims = "[ ]+";
+		int count = 0;
 		int[] wordsInSentence = new int[passedSentences.length];
-		for (int i = 0; i < wordsInSentence.length; i++) {
-			wordsInSentence[i] = passedSentences[i].split(delims).length;
+		for (int i = 0; i < wordsInSentence.length; i++) { 
+			count += passedSentences[i].split(delims).length;
+			wordsInSentence[i] = count;
 		}
 		return wordsInSentence;
 	}
