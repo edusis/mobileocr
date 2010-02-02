@@ -19,9 +19,7 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
  * This is the main activity for the MobileOCR application.
  * The application uses text to speech to output information
  * TODO Add more comments
- * TODO: Add logs  Log.e("MOCR","Stop Activity");
- * TODO Make the long press be "continue play" NEEDS TIMERS
- * TODO Add the left and right swipes to scroll by word
+ * TODO: Add logs  Log.d("MOCR","Stop Activity");
  */
 
 public class MobileOCR extends Activity implements OnGestureListener, OnInitListener {
@@ -33,9 +31,9 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		MobileOCR.setPassedString("These are the instructions. First hit the button that says push first! " +
-				"This parses the paragraph into sentences. Now tap the screen to play and pause the speech. " +
-				"Swipe up and down to change sentences");
+		MobileOCR.setPassedString("(1) Our enemies are innovative and resourceful, and so are we. They never stop thinking about new ways to harm our country and our people, and neither do we. "  +
+				"(2) If this were a dictatorship, it'd be a heck of a lot easier, just so long as I'm the dictator. " +
+				"(3) Rarely is the questioned asked: Is our children learning?");
 		final Button speak2 = (Button) findViewById(R.id.go);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
