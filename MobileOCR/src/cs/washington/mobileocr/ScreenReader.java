@@ -32,7 +32,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 
 		sentenceArray = TextParser.sentenceParse(MobileOCR.getPassedString());
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
-		Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at " + wordsInSentences[0] + "," + wordsInSentences[1]+ "," + wordsInSentences[2]+ "," + wordsInSentences[3], Toast.LENGTH_SHORT).show();
+		//Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at " + wordsInSentences[0] + "," + wordsInSentences[1]+ "," + wordsInSentences[2]+ "," + wordsInSentences[3], Toast.LENGTH_SHORT).show();
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
 
 		gestureScanner = new GestureDetector(this);
@@ -162,16 +162,14 @@ public class ScreenReader extends Activity implements OnGestureListener {
 				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else {
-				if (loc[1] > 0 && loc[2] > 0) {
-					loc[2]--;
-					if (loc[2] < 0) {
-						loc[1]--;
-						loc[0] = wordArray[loc[1]].length();
-					}
-					if (loc[1] < wordsInSentences[loc[0]])
-						loc[0]--;
-					MobileOCR.getmTts().speak(" " + wordArray[loc[1]].charAt(loc[2]), TextToSpeechBeta.QUEUE_FLUSH, null);
+				loc[2]--;
+				if (loc[2] < 0) {
+					loc[1]--;
+					loc[2] = wordArray[loc[1]].length() - 1;
 				}
+				if (loc[0] > 0 && loc[1] < wordsInSentences[loc[0] - 1])
+					loc[0]--;
+				MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			Toast.makeText(getApplicationContext(), "Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
 		}
@@ -194,33 +192,34 @@ public class ScreenReader extends Activity implements OnGestureListener {
 				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else {
-				if (loc[1] <= wordArray.length - 1 && loc[2] < wordArray[loc[1]].length() - 1) {
+				if (loc[1] <= wordArray.length - 1 && loc[2] < wordArray[loc[1]].length()) {
 					loc[2]++;
 					if (loc[2] >= wordArray[loc[1]].length()) {
 						loc[1]++;
-						loc[0] = 0;
+						loc[2] = 0;
 					}
 					if (loc[1] >= wordsInSentences[loc[0]])
 						loc[0]++;
 					MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, null);
-					Toast.makeText(getApplicationContext(), "char = " + wordArray[loc[1]].charAt(loc[2]), Toast.LENGTH_SHORT).show();
+					//Toast.makeText(getApplicationContext(), "char = " + wordArray[loc[1]].charAt(loc[2]), Toast.LENGTH_SHORT).show();
 				}
 			}
 			Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
 		}
 	}
-	
+
 	public String speakChar(char passedChar) {
 		String str = "";
-        switch (passedChar) {
-            case '!': str = "exclaimation"; break;
-            case '.': str = "period"; break;
-            case '?': str = "question mark"; break;
-            case ',': str = "comma"; break;
-            case '(': str = "left parenthesis"; break;
-            case ')': str = "right parenthesis"; break;
-            default: str = " " + Character.toString(passedChar) + " "; break;
-        }
+		switch (passedChar) {
+		case '!': str = "exclaimation"; break;
+		case '.': str = "period"; break;
+		case '?': str = "question mark"; break;
+		case ',': str = "comma"; break;
+		case '(': str = "left parenthesis"; break;
+		case ')': str = "right parenthesis"; break;
+		case 'a': str = "ayee"; break;
+		default: str = " " + Character.toString(passedChar) + " "; break;
+		}
 		return str;
 	}
 }
