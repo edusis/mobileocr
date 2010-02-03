@@ -32,7 +32,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 
 		sentenceArray = TextParser.sentenceParse(MobileOCR.getPassedString());
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
-		//Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at 0 = " + wordsInSentences[0], Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at " + wordsInSentences[0] + "," + wordsInSentences[1]+ "," + wordsInSentences[2]+ "," + wordsInSentences[3], Toast.LENGTH_SHORT).show();
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
 
 		gestureScanner = new GestureDetector(this);
@@ -64,9 +64,6 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		super.onDestroy();
 	}
 
-	/*
-	 * The rest of the code is gesture detection for screen reading
-	 */
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
@@ -137,7 +134,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 			else if (mode == 1)
 				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			else
-				MobileOCR.getmTts().speak("" + wordArray[loc[1]].charAt(loc[2]), TextToSpeechBeta.QUEUE_FLUSH, null);
+				MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, null);
 		}
 		return true;
 	}
@@ -147,18 +144,21 @@ public class ScreenReader extends Activity implements OnGestureListener {
 			if (mode == 0) {
 				if (loc[0] > 0) {
 					loc[0]--;
-					loc[1] = wordsInSentences[loc[0]] - wordsInSentences[0];
-					loc[2] = 0;
+					if (loc[0] != 0)
+						loc[1] = wordsInSentences[loc[0] - 1];
+					else
+						loc[1] = 0;
 				}
+				loc[2] = 0;
 				MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else if (mode == 1) {
 				if (loc[1] > 0) {
 					loc[1]--;
-					loc[2] = 0;
-					if (loc[1] < wordsInSentences[loc[0]])
+					if (loc[0] > 0 && loc[1] < wordsInSentences[loc[0] - 1])
 						loc[0]--;
 				}
+				loc[2] = 0;
 				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else {
@@ -180,17 +180,17 @@ public class ScreenReader extends Activity implements OnGestureListener {
 				if (loc[0] < sentenceArray.length - 1) {
 					loc[0]++;
 					loc[1] = wordsInSentences[loc[0] - 1];
-					loc[2] = 0;
 				}
+				loc[2] = 0;
 				MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else if (mode == 1) {
 				if (loc[1] < wordArray.length - 1) {
 					loc[1]++;
-					loc[2] = 0;
-					if (loc[1] >= wordsInSentences[loc[0] + 1])
+					if (loc[1] >= wordsInSentences[loc[0]])
 						loc[0]++;
 				}
+				loc[2] = 0;
 				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, null);
 			}
 			else {
@@ -202,11 +202,25 @@ public class ScreenReader extends Activity implements OnGestureListener {
 					}
 					if (loc[1] >= wordsInSentences[loc[0]])
 						loc[0]++;
-					MobileOCR.getmTts().speak("" + wordArray[loc[1]].charAt(loc[2]), TextToSpeechBeta.QUEUE_FLUSH, null);
+					MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, null);
 					Toast.makeText(getApplicationContext(), "char = " + wordArray[loc[1]].charAt(loc[2]), Toast.LENGTH_SHORT).show();
 				}
 			}
 			Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
 		}
+	}
+	
+	public String speakChar(char passedChar) {
+		String str = "";
+        switch (passedChar) {
+            case '!': str = "exclaimation"; break;
+            case '.': str = "period"; break;
+            case '?': str = "question mark"; break;
+            case ',': str = "comma"; break;
+            case '(': str = "left parenthesis"; break;
+            case ')': str = "right parenthesis"; break;
+            default: str = " " + Character.toString(passedChar) + " "; break;
+        }
+		return str;
 	}
 }

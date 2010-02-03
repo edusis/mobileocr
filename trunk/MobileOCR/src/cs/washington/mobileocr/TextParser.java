@@ -12,7 +12,7 @@ public class TextParser {
 	 */
 	public static String[] sentenceParse(String passedString) {
 		String delims = "[.?!,]+";
-		String[] tokens = passedString.split(delims);
+		String[] tokens = passedString.trim().split(delims);
 		return tokens;
 	}
 	
@@ -21,7 +21,7 @@ public class TextParser {
 	 */
 	public static String[] wordParse(String passedString) {
 		String delims = "[ ]+";
-		String[] tokens = passedString.split(delims);
+		String[] tokens = passedString.trim().split(delims);
 		return tokens;
 	}
 	
@@ -30,7 +30,7 @@ public class TextParser {
 		int count = 0;
 		int[] wordsInSentence = new int[passedSentences.length];
 		for (int i = 0; i < wordsInSentence.length; i++) { 
-			count += passedSentences[i].split(delims).length;
+			count += passedSentences[i].trim().split(delims).length;
 			wordsInSentence[i] = count;
 		}
 		return wordsInSentence;
