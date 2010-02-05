@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.widget.Button;
 import android.widget.TextView;
@@ -50,6 +51,21 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 
 		gestureScanner = new GestureDetector(this);
+		gestureScanner.setOnDoubleTapListener(new OnDoubleTapListener(){
+			public boolean onDoubleTap(MotionEvent e) {
+				Toast.makeText(getApplicationContext(), "Double Tap", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+			public boolean onDoubleTapEvent(MotionEvent e) {
+				return false;
+			}
+			public boolean onSingleTapConfirmed(MotionEvent e) {
+				Toast.makeText(getApplicationContext(), "Single Tap 2", Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+		});
+
 		
 		TextView text = (TextView) findViewById(R.id.text);
         text.setText(passedString);
