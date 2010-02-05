@@ -28,6 +28,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	private static TextToSpeechBeta mTts;
 	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
+	private CountDown counter;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,6 +70,9 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		
 		TextView text = (TextView) findViewById(R.id.text);
         text.setText(passedString);
+        
+        counter = new CountDown(5000,1000);
+       
 	}
 
 	//TODO: Better activity management
@@ -161,6 +165,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public void onLongPress(MotionEvent e) {
 		Toast mToast = Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT);
 		mToast.show();
+		//counter.start();
 	}
 
 	@Override
