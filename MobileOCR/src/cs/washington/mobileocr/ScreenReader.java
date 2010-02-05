@@ -28,6 +28,9 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
 	private int[] wordsInSentences;
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
+	private CountDown counter;
+	public static String[] autoplaySentences;
+	public static int sentenceLoc;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -37,12 +40,16 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		//Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at " + wordsInSentences[0] + "," + wordsInSentences[1]+ "," + wordsInSentences[2]+ "," + wordsInSentences[3], Toast.LENGTH_SHORT).show();
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
+		
+		counter = new CountDown(25000,500);
 
 		gestureScanner = new GestureDetector(this);
 		gestureScanner.setOnDoubleTapListener(new OnDoubleTapListener(){
 			public boolean onDoubleTap(MotionEvent e) {
 				Toast.makeText(getApplicationContext(), "Double Tap", Toast.LENGTH_SHORT).show();
-				//TODO: Autoplay
+				autoplaySentences = sentenceArray;
+				sentenceLoc = loc[0];
+				counter.start();
 				return false;
 			}
 			public boolean onDoubleTapEvent(MotionEvent e) {
@@ -67,9 +74,6 @@ public class ScreenReader extends Activity implements OnGestureListener {
 				return false;
 			}
 		});
-
-		//CountDown counter = new CountDown(5000,1000);
-		//counter.start();
 	}
 
 	//TODO: Better activity management
