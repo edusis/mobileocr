@@ -165,7 +165,6 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public void onLongPress(MotionEvent e) {
 		Toast mToast = Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT);
 		mToast.show();
-		//counter.start();
 	}
 
 	@Override

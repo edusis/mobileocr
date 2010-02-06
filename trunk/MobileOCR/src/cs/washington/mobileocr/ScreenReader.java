@@ -31,6 +31,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	private CountDown counter;
 	public static String[] autoplaySentences;
 	public static int sentenceLoc;
+	private String[] instructions = {"Currently in: Sentence Mode", "Swipe up or down to change modes", "Tap to play or pause current text", "Swipe left and right to navigate text", "Double tap to play continuously", "Tap and hold to repeat the instructions"};
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,7 +41,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		//Toast.makeText(getApplicationContext(), "wordsInSentences = " + wordsInSentences.length + " at " + wordsInSentences[0] + "," + wordsInSentences[1]+ "," + wordsInSentences[2]+ "," + wordsInSentences[3], Toast.LENGTH_SHORT).show();
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
-		
+				
 		counter = new CountDown(25000,500);
 
 		gestureScanner = new GestureDetector(this);
@@ -80,7 +81,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		onLongPress(null);
+		speakInstructions();
 	}
 
 	@Override
@@ -107,6 +108,8 @@ public class ScreenReader extends Activity implements OnGestureListener {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent me) {
+		MobileOCR.getmTts().stop();
+		counter.cancel();
 		return gestureScanner.onTouchEvent(me);
 	}
 
@@ -118,7 +121,6 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			MobileOCR.getmTts().stop();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
 			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
@@ -148,13 +150,7 @@ public class ScreenReader extends Activity implements OnGestureListener {
 	@Override
 	public void onLongPress(MotionEvent e) {
 		Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT).show();
-		MobileOCR.getmTts().stop();
-		MobileOCR.getmTts().speak("Currently in: " + modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, null);
-		MobileOCR.getmTts().speak("Swipe up or down to change modes", TextToSpeechBeta.QUEUE_ADD, null);
-		MobileOCR.getmTts().speak("Tap to play or pause current text", TextToSpeechBeta.QUEUE_ADD, null);
-		MobileOCR.getmTts().speak("Swipe left and right to navigate text", TextToSpeechBeta.QUEUE_ADD, null);
-		MobileOCR.getmTts().speak("Double tap to play continuously", TextToSpeechBeta.QUEUE_ADD, null);
-		MobileOCR.getmTts().speak("Tap and hold to repeat the instructions", TextToSpeechBeta.QUEUE_ADD, null);
+		speakInstructions();
 	}
 
 	@Override
@@ -277,5 +273,12 @@ public class ScreenReader extends Activity implements OnGestureListener {
 		default: str = " " + Character.toString(passedChar) + " "; break;
 		}
 		return str;
+	}
+	
+	public void speakInstructions() {
+		autoplaySentences = instructions;
+		autoplaySentences[0] = "Currently in: " + modeSpeak[mode];
+		sentenceLoc = 0;
+		counter.start();
 	}
 }
