@@ -1,5 +1,7 @@
 package cs.washington.mobileocr;
 
+import java.util.HashMap;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,12 +25,12 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
  * TODO: Add logs  Log.d("MOCR","Stop Activity");
  */
 
-public class MobileOCR extends Activity implements OnGestureListener, OnInitListener {
+public class MobileOCR extends Activity implements OnGestureListener, OnInitListener, TextToSpeechBeta.OnUtteranceCompletedListener {
 
 	private static TextToSpeechBeta mTts;
 	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
-	private CountDown counter;
+	//private CountDown counter;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,7 +73,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		TextView text = (TextView) findViewById(R.id.text);
         text.setText(passedString);
         
-        counter = new CountDown(5000,1000);
+        //counter = new CountDown(5000,1000);
        
 	}
 
@@ -163,8 +165,18 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 
 	@Override
 	public void onLongPress(MotionEvent e) {
-		Toast mToast = Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT);
-		mToast.show();
+		//Toast mToast = Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT);
+		//mToast.show();
+		mTts.setOnUtteranceCompletedListener(this);
+		HashMap<String, String> myHashAlarm = new HashMap();
+		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "ID");
+		mTts.speak("It was a clear black night", TextToSpeechBeta.QUEUE_ADD, myHashAlarm);
+	}
+	
+	@Override
+	public void onUtteranceCompleted(String utteranceId) {
+		//Toast.makeText(getApplicationContext(), "Good!!!!", Toast.LENGTH_SHORT).show();
+		mTts.speak("From MOCR UI", TextToSpeechBeta.QUEUE_ADD, null);
 	}
 
 	@Override
@@ -198,4 +210,6 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public static String getPassedString() {
 		return passedString;
 	}
+
+
 }
