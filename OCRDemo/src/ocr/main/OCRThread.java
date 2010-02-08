@@ -59,14 +59,16 @@ public class OCRThread extends HandlerThread {
                 	/*BitmapFactory.Options opt = new BitmapFactory.Options();
                 	opt.outWidth = msg.arg1;
                 	opt.outHeight = msg.arg2;
+                	opt.inPreferredConfig = Bitmap.Config.ALPHA_8;
                 	sendOCRRequest(BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length, opt));
-                */	
-                	Bitmap b = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length);
-                	if (b != null)
+                	*/
+                	//Bitmap b = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length);
+                	//Bitmap b = Bitmap.createBitmap(convByteArr2IntArr((byte[])msg.obj), msg.arg1, msg.arg2, Bitmap.Config.);
+                	/*if (b != null)
                 	{
                 		sendOCRRequest(b);
-                	}
-                	//sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
+                	}*/
+                	sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
                     //sendOCRRequest(detectWord((byte[])msg.obj, msg.arg1, msg.arg2));
                     break;
                 case R.id.msg_ocr_quit:
@@ -77,6 +79,16 @@ public class OCRThread extends HandlerThread {
                 }
             }
         };
+    }
+    
+    private int[] convByteArr2IntArr(byte[] barr)
+    {
+    	int[] iarr = new int[barr.length];
+    	for (int i = 0 ; i <  iarr.length; i++)
+    	{
+    		iarr[i] = barr[i];
+    	}
+    	return iarr;
     }
     
     public OCRThread (Handler uiHandler) {
