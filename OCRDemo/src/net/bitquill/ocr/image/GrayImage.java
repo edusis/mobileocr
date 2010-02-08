@@ -195,8 +195,20 @@ public class GrayImage extends GrayMatrix {
         int imgHeight = mHeight;
         //GrayToARGB(mData, imgWidth, imgHeight, buf, left, top, width, height);
         decodeYUV(buf, mData, imgWidth, imgHeight);
+        
+        //Bitmap b = Bitmap.createBitmap(convByteArr2IntArr(mData), width, height, Config.ARGB_8888);
         Bitmap b = Bitmap.createBitmap(buf, width, height, Config.ARGB_8888);
         return b;        
+    }
+    
+    public int[] convByteArr2IntArr(byte[] barr)
+    {
+    	int[] iarr = new int[barr.length];
+    	for (int i = 0 ; i <  iarr.length; i++)
+    	{
+    		iarr[i] = barr[i];
+    	}
+    	return iarr;
     }
     
     final public Bitmap asBitmap (int left, int top, int width, int height) {

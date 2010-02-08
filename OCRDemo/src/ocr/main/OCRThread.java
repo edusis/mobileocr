@@ -1,5 +1,7 @@
 package ocr.main;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import ocr.main.FileDumpUtil;
@@ -9,14 +11,19 @@ import net.bitquill.ocr.image.SimpleStructuringElement;
 
 import ocr.weocr.WeOCRClient;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
 public class OCRThread extends HandlerThread {
+	//TEST VAR
+	public static int count = 0;
+	
     private static final String TAG = OCRThread.class.getSimpleName();
     
     public static final String WORD_RECT = "word_rect";
@@ -49,7 +56,17 @@ public class OCRThread extends HandlerThread {
                 	
                 	break;
                 case R.id.msg_ocr_recognize:
-                	sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
+                	/*BitmapFactory.Options opt = new BitmapFactory.Options();
+                	opt.outWidth = msg.arg1;
+                	opt.outHeight = msg.arg2;
+                	sendOCRRequest(BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length, opt));
+                */	
+                	Bitmap b = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length);
+                	if (b != null)
+                	{
+                		sendOCRRequest(b);
+                	}
+                	//sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
                     //sendOCRRequest(detectWord((byte[])msg.obj, msg.arg1, msg.arg2));
                     break;
                 case R.id.msg_ocr_quit:
@@ -77,6 +94,20 @@ public class OCRThread extends HandlerThread {
     }
     
     private void sendOCRRequest (Bitmap textBitmap) {
+    	
+    /*	try {
+    		File photo=new File(Environment.getExternalStorageDirectory(),"testImage"+ count +".jpg"); 
+    		photo.mkdirs();
+    		photo.createNewFile();
+            FileOutputStream out = new FileOutputStream(photo.getPath());
+            textBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+            count++;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+    	
         WeOCRClient weOCRClient = OCRApplication.getInstance().getOCRClient();
         try {
             String ocrText = weOCRClient.doOCR(textBitmap);
@@ -114,6 +145,8 @@ public class OCRThread extends HandlerThread {
 
         //startTime = System.currentTimeMillis();
         Bitmap textBitmap = mResultImg.asBitmap(ext);
+        
+        
         //Log.d(TAG, "Converted to Bitmap in " + (System.currentTimeMillis() - startTime) + " msec");
         
         if (mEnableDump) {
