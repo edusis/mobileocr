@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Handler;
 import android.os.Message;
@@ -97,6 +99,14 @@ public class CameraFacade implements SurfaceHolder.Callback {
 
     }
         
+    public void startPreview()
+    {
+    	if(!mPreviewRunning)
+        	mCamera.startPreview();
+        
+        mPreviewRunning = true;
+    }
+    
     private void startCamera() {
         if(mCamera == null)
                 mCamera = Camera.open();
@@ -121,10 +131,10 @@ public class CameraFacade implements SurfaceHolder.Callback {
     private void setCameraParameters() {
         Camera.Parameters parameters = mCamera.getParameters();
         parameters.setPreviewSize(mx, my);
-        parameters.remove("whitebalance"); // theoretically, this might do something helpful
+        //parameters.remove("whitebalance"); // theoretically, this might do something helpful
         
         parameters.setPictureFormat(PixelFormat.JPEG);
-        parameters.setPreviewFormat(PixelFormat.JPEG);
+       
         mCamera.setParameters(parameters);
         if(!mPreviewRunning)
         	mCamera.startPreview();
@@ -171,6 +181,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_auto_focus, 
                         success ? AUTOFOCUS_SUCCESS : AUTOFOCUS_FAILURE, -1);
                 mUIHandler.sendMessage(msg);
+                
             }
         });
     }
@@ -183,23 +194,20 @@ public class CameraFacade implements SurfaceHolder.Callback {
         if (mAutoFocusInProgress || mPreviewCaptureInProgress) {
             return;
         }
-        mPreviewCaptureInProgress = true;
+        
+        mCamera.takePicture(shutterCallback, null, jpegCallback);
+        /*mPreviewCaptureInProgress = true;
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
           
             public void onPreviewFrame(byte[] data, Camera camera) {
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
                 mUIHandler.sendMessage(msg);
             }
-        });
+        });*/
     }
     
     public void clearPreviewFrame() {
     	mPreviewCaptureInProgress = false;
-    }
-    private void initCameraStateVariables () {
-        mAutoFocusStatus = AUTOFOCUS_UNKNOWN;
-        mAutoFocusInProgress = false;
-        mPreviewCaptureInProgress = false;
     }
     
     public Size getPreviewSize() {
@@ -217,4 +225,35 @@ public class CameraFacade implements SurfaceHolder.Callback {
     public int getHeight() {
     	return my;
     }
+    
+    private void initCameraStateVariables () {
+        mAutoFocusStatus = AUTOFOCUS_UNKNOWN;
+        mAutoFocusInProgress = false;
+        mPreviewCaptureInProgress = false;
+    }
+    
+    private ShutterCallback shutterCallback = new ShutterCallback() {
+
+		public void onShutter() {
+			// TODO Auto-generated method stub
+		}
+    	
+    };
+    
+    private PictureCallback jpegCallback = new PictureCallback() {
+
+		public void onPictureTaken(byte[] data, Camera camera) {
+			if (data != null)
+			{
+				mPreviewCaptureInProgress = true;
+				Message picDataMsg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
+				mUIHandler.sendMessage(picDataMsg);
+			}
+			else
+			{
+				mCamera.startPreview();
+			}
+		}
+    	
+    };
 }

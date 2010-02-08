@@ -1,6 +1,11 @@
+/**
+ * @author Hussein Yapit
+ */
+
 package ocr.main;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -147,20 +152,13 @@ public class OCRDemo extends Activity {
 			case R.id.msg_ui_ocr_success:
 				mProcessingInProgress = false;
 				
-				//mResultText.setText((String)msg.obj);
-				/*try {
-					initFile();
-				} catch (Exception e) {
-					Log.d(TAG, e.toString());
-					Log.d(TAG, (String)msg.obj);
-				}
-				
-				writeToFile((String)msg.obj);*/
 				cameraFacade.onPause();
+				
 				startOCRResultView((String)msg.obj);
+				
 				break;
 			case R.id.msg_ui_ocr_fail:
-				mResultText.setText("Request fails");
+				cameraFacade.startPreview();
 				break;
 			}
 		}
