@@ -67,13 +67,8 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 			}
 			public boolean onSingleTapConfirmed(MotionEvent e) {
 				Log.e("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
-				if (!doneSpeaking || MobileOCR.getmTts().isSpeaking()) {
+				if (doneSpeaking) {
 					myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
-					MobileOCR.getmTts().stop();
-				}
-				else {
-					myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
-					doneSpeaking = false;
 					if (mode == 0)
 						startPlaying(sentenceArray[loc[0]]);
 					else if (mode == 1)
@@ -85,6 +80,8 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 							startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 					}
 				}
+				else
+					stopPlaying();
 				return false;
 			}
 		});
@@ -96,6 +93,9 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	}
 	
 	public void stopPlaying() {
+		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+		MobileOCR.getmTts().playSilence(100, TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+		MobileOCR.getmTts().stop();
 		doneSpeaking = true;
 	}
 
@@ -112,13 +112,11 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 
 	@Override
 	public void onStop() {
-		MobileOCR.getmTts().shutdown();
 		super.onDestroy();
 	}
 
 	@Override
 	public void onDestroy() {
-		MobileOCR.getmTts().shutdown();
 		super.onDestroy();
 	}
 
@@ -136,8 +134,6 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
 			myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
-			doneSpeaking = false;
-			MobileOCR.getmTts().stop();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
 			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //left
@@ -290,8 +286,6 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	public void speakInstructions() {
 		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
-		doneSpeaking = false;
-		MobileOCR.getmTts().stop();
 		startPlaying("Currently in: " + modeSpeak[mode]);
 	}
 	

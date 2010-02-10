@@ -35,9 +35,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		MobileOCR.setPassedString("(1) Our enemies are innovative and resourceful, and so are we. They never stop thinking about new ways to harm our country and our people, and neither do we. "  +
-				"(2) If this were a dictatorship, it'd be a heck of a lot easier, just so long as I'm the dictator. " +
-				"(3) Rarely is the questioned asked: Is our children learning?");
+		MobileOCR.setPassedString("He knows a hero when he sees one. Too few characters out there, flying around like that, saving old girls like me. Everybody loves a hero. Years later, they'll tell how they stood in the rain for hours just to get a glimpse of the one who taught them how to hold on a second longer. I believe there's a hero in all of us that keeps us honest, gives us strength, makes us noble, and finally allows us to die with pride, even though sometimes we have to be steady, and give up the thing we want the most. Even our dreams.");
 		final Button speak2 = (Button) findViewById(R.id.go);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
