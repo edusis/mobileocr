@@ -9,7 +9,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
-import android.widget.Toast;
 import com.google.tts.TextToSpeechBeta;
 
 /*
@@ -58,36 +57,46 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 		gestureScanner = new GestureDetector(this);
 		gestureScanner.setOnDoubleTapListener(new OnDoubleTapListener(){
 			public boolean onDoubleTap(MotionEvent e) {
-				Toast.makeText(getApplicationContext(), "Double Tap", Toast.LENGTH_SHORT).show();
+				Log.e("MOCR","Double Tap");
 				myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
-				MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(sentenceArray[loc[0]]);
 				return false;
 			}
 			public boolean onDoubleTapEvent(MotionEvent e) {
 				return false;
 			}
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				Toast.makeText(getApplicationContext(), "Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
-				Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
-				if (!doneSpeaking)
+				Log.e("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+				if (!doneSpeaking || MobileOCR.getmTts().isSpeaking()) {
+					myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 					MobileOCR.getmTts().stop();
+				}
 				else {
 					myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 					doneSpeaking = false;
 					if (mode == 0)
-						MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+						startPlaying(sentenceArray[loc[0]]);
 					else if (mode == 1)
-						MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+						startPlaying(wordArray[loc[1]]);
 					else {
 						if (saySpace != 0)
-							MobileOCR.getmTts().speak("space", TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+							startPlaying("space");
 						else
-							MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+							startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 					}
 				}
 				return false;
 			}
 		});
+	}
+	
+	public void startPlaying(String passedStr) {
+		MobileOCR.getmTts().speak(passedStr, TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+		doneSpeaking = false;
+	}
+	
+	public void stopPlaying() {
+		doneSpeaking = true;
 	}
 
 	@Override
@@ -128,25 +137,22 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 		try {
 			myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			doneSpeaking = false;
+			MobileOCR.getmTts().stop();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
-			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-				//Toast.makeText(getApplicationContext(), "Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
+			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //left
 				playOnGesture(true);
-			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-				//Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
+			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //right
 				playOnGesture(false);
 			}
-			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //up
 				if (mode == 0)
 					mode = 3;
 				mode = (mode - 1) % 3;
-				//Toast.makeText(getApplicationContext(), "Swipe up, mode = " + mode, Toast.LENGTH_SHORT).show();
-				MobileOCR.getmTts().speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
-			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
-				//Toast.makeText(getApplicationContext(), "Swipe down, mode = " + mode, Toast.LENGTH_SHORT).show();
+				startPlaying(modeSpeak[mode]);
+			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //down
 				mode = (mode + 1) % 3;
-				MobileOCR.getmTts().speak(modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(modeSpeak[mode]);
 			}
 		} catch (Exception e) {
 			// nothing
@@ -156,7 +162,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 
 	@Override
 	public void onLongPress(MotionEvent e) {
-		Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT).show();
+		Log.e("MOCR","Long Press");
 		speakInstructions();
 	}
 
@@ -185,7 +191,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 						loc[1] = 0;
 				}
 				loc[2] = 0;
-				MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(sentenceArray[loc[0]]);
 			}
 			else if (mode == 1) {
 				if (loc[1] > 0) {
@@ -194,7 +200,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 						loc[0]--;
 				}
 				loc[2] = 0;
-				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(wordArray[loc[1]]);
 			}
 			else {
 				if(loc[1] > 0 && loc[2] >= 0) {
@@ -214,11 +220,11 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 						loc[0]--;
 				}
 				if (saySpace == 2)
-					MobileOCR.getmTts().speak("space", TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+					startPlaying("space");
 				else
-					MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 			}
-			Toast.makeText(getApplicationContext(), "Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
+			Log.e("MOCR","Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
 		else {
 			if (mode == 0) {
@@ -227,7 +233,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 					loc[1] = wordsInSentences[loc[0] - 1];
 				}
 				loc[2] = 0;
-				MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(sentenceArray[loc[0]]);
 			}
 			else if (mode == 1) {
 				if (loc[1] < wordArray.length - 1) {
@@ -236,7 +242,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 						loc[0]++;
 				}
 				loc[2] = 0;
-				MobileOCR.getmTts().speak(wordArray[loc[1]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+				startPlaying(wordArray[loc[1]]);
 			}
 			else {
 				if (!(loc[1] == wordArray.length - 1 && loc[2] == wordArray[wordArray.length - 1].length() - 1)) {
@@ -256,11 +262,11 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 						loc[0]++;
 				}
 				if (saySpace == 1)
-					MobileOCR.getmTts().speak("space", TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+					startPlaying("space");
 				else
-					MobileOCR.getmTts().speak(speakChar(wordArray[loc[1]].charAt(loc[2])), TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 			}
-			Toast.makeText(getApplicationContext(), "Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")", Toast.LENGTH_SHORT).show();
+			Log.e("MOCR","Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
 	}
 
@@ -284,22 +290,25 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	public void speakInstructions() {
 		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
-		MobileOCR.getmTts().speak("Currently in: " + modeSpeak[mode], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+		doneSpeaking = false;
+		MobileOCR.getmTts().stop();
+		startPlaying("Currently in: " + modeSpeak[mode]);
 	}
 	
 	@Override
 	public void onUtteranceCompleted(String uttId) {
+		doneSpeaking = true;
+		MobileOCR.getmTts().stop();
 		if (uttId.equals("Instructions") && autoplay < instructions.length) {
-			MobileOCR.getmTts().speak(instructions[autoplay], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+			startPlaying(instructions[autoplay]);
 			autoplay++;
+			doneSpeaking = false;
 		}
 		if (uttId.equals("Sentences") && loc[0] < sentenceArray.length - 1) {
 			loc[1] = wordsInSentences[loc[0]];
 			loc[0]++;
-			MobileOCR.getmTts().speak(sentenceArray[loc[0]], TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
-		}
-		if (uttId.equals("Speaking")) {
-			doneSpeaking = true;
+			startPlaying(sentenceArray[loc[0]]);
+			doneSpeaking = false;
 		}
 	}
 }
