@@ -25,23 +25,23 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	private String[] sentenceArray;
 	private String[] wordArray;
 	private int[] wordsInSentences;
-	
+
 	private int mode = 0;
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
-	
+
 	private String[] instructions = {"Fling up or down to change modes", "Tap to play or pause current text", "Fling left and right to navigate text", "Double tap to play continuously", "Tap and hold to repeat the instructions"};
-	
+
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
-	
+
 	HashMap<String, String> myHashAlarm = new HashMap<String, String>();
 	private int autoplay = 0;
 	private Boolean doneSpeaking = true;
-	
+
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 	private GestureDetector gestureScanner;
-	
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screenreader);
@@ -49,7 +49,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 		sentenceArray = TextParser.sentenceParse(MobileOCR.getPassedString());
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		wordArray = TextParser.wordParse(MobileOCR.getPassedString());
-		
+
 		MobileOCR.getmTts().setOnUtteranceCompletedListener(this);
 
 		gestureScanner = new GestureDetector(this);
@@ -87,12 +87,12 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 			}
 		});
 	}
-	
+
 	public void startPlaying(String passedStr) {
 		MobileOCR.getmTts().speak(passedStr, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 		doneSpeaking = false;
 	}
-	
+
 	public void stopPlaying() {
 		if (!doneSpeaking)
 			MobileOCR.getmTts().stop();
@@ -178,6 +178,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	}
 
 	public void playOnGesture(boolean leftSwipe) {
+		saySpace = 0;
 		if (leftSwipe) {
 			if (mode == 0) {
 				if (loc[0] > 0) {
@@ -200,26 +201,29 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 				startPlaying(wordArray[loc[1]]);
 			}
 			else {
-				if(loc[1] > 0 && loc[2] >= 0) {
+				if (loc[1] == 0 && loc[2] == 0)
+					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
+				else if (loc[1] >= 0 && loc[2] >= -1) {
 					loc[2]--;
-					if (loc[2] < 0) {
-						if (saySpace == 2) {
-							loc[1]--;
-							loc[2] = wordArray[loc[1]].length() - 1;
-							saySpace = 0;
-						}
-						else {
-							saySpace = 2;
-							loc[2]++;
-						}
+					if (loc[2] == -1) {
+						saySpace = 1;
+						startPlaying("space");
+						return;
+					}
+					else if (loc[2] < -1) {
+						loc[1]--;
+						loc[2] = wordArray[loc[1]].length() - 1;
+					}
+					else {
+						//Nothing
 					}
 					if (loc[0] > 0 && loc[1] < wordsInSentences[loc[0] - 1])
 						loc[0]--;
-				}
-				if (saySpace == 2)
-					startPlaying("space");
-				else
 					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
+				}
+				else {
+					//Nothing
+				}
 			}
 			Log.e("MOCR","Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
@@ -244,24 +248,22 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 			else {
 				if (!(loc[1] == wordArray.length - 1 && loc[2] == wordArray[wordArray.length - 1].length() - 1)) {
 					loc[2]++;
-					if (loc[2] >= wordArray[loc[1]].length()) {
-						if (saySpace == 1) {
-							loc[1]++;
-							loc[2] = 0;
-							saySpace = 0;
-						}
-						else {
-							saySpace = 1;
-							loc[2]--;
-						}
+					if (loc[2] == wordArray[loc[1]].length()) {
+						saySpace = 1;
+						startPlaying("space");
+						return;
+					}
+					else if (loc[2] > wordArray[loc[1]].length()) {
+						loc[1]++;
+						loc[2] = 0;
+					}
+					else {
+						//Nothing
 					}
 					if (loc[1] >= wordsInSentences[loc[0]])
 						loc[0]++;
 				}
-				if (saySpace == 1)
-					startPlaying("space");
-				else
-					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
+				startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 			}
 			Log.e("MOCR","Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
@@ -283,14 +285,14 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 		}
 		return str;
 	}
-	
+
 	public void speakInstructions() {
 		stopPlaying();
 		myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
 		startPlaying("Currently in: " + modeSpeak[mode]);
 	}
-	
+
 	@Override
 	public void onUtteranceCompleted(String uttId) {
 		doneSpeaking = true;
