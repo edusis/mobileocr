@@ -4,24 +4,22 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
-import com.google.tts.TextToSpeechBeta;
 
 /*
  * Team Sparkplugs (Josh Scotland and Hussein Yapit)
  * This is the main activity for the MobileOCR application.
  * The application uses text to speech to output information
- * TODO Add more comments
- * TODO: Add logs  Log.d("MOCR","Stop Activity");
  * TODO: Fix the space when the person moves on a space, it skips / plays spaces
- * TODO: The TTS won't STOP sometimes when you tell it to stop
+ * TODO: BUG: on triple swipes or on auto playing, tapping to stop will replay the sentence
  */
 
-public class ScreenReader extends Activity implements OnGestureListener, TextToSpeechBeta.OnUtteranceCompletedListener {
+public class ScreenReader extends Activity implements OnGestureListener, TextToSpeech.OnUtteranceCompletedListener {
 
 	private int[] loc = {0,0,0};  // Sentence number, word number, letter number
 	private String[] sentenceArray;
@@ -58,7 +56,8 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 		gestureScanner.setOnDoubleTapListener(new OnDoubleTapListener(){
 			public boolean onDoubleTap(MotionEvent e) {
 				Log.e("MOCR","Double Tap");
-				myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
+				stopPlaying();
+				myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
 				startPlaying(sentenceArray[loc[0]]);
 				return false;
 			}
@@ -68,7 +67,7 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 			public boolean onSingleTapConfirmed(MotionEvent e) {
 				Log.e("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 				if (doneSpeaking) {
-					myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+					myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 					if (mode == 0)
 						startPlaying(sentenceArray[loc[0]]);
 					else if (mode == 1)
@@ -80,22 +79,23 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 							startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 					}
 				}
-				else
+				else {
+					myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 					stopPlaying();
+				}
 				return false;
 			}
 		});
 	}
 	
 	public void startPlaying(String passedStr) {
-		MobileOCR.getmTts().speak(passedStr, TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
+		MobileOCR.getmTts().speak(passedStr, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 		doneSpeaking = false;
 	}
 	
 	public void stopPlaying() {
-		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
-		MobileOCR.getmTts().playSilence(100, TextToSpeechBeta.QUEUE_FLUSH, myHashAlarm);
-		MobileOCR.getmTts().stop();
+		if (!doneSpeaking)
+			MobileOCR.getmTts().stop();
 		doneSpeaking = true;
 	}
 
@@ -133,7 +133,8 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			stopPlaying();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
 			if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //left
@@ -284,7 +285,8 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	}
 	
 	public void speakInstructions() {
-		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
+		stopPlaying();
+		myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
 		startPlaying("Currently in: " + modeSpeak[mode]);
 	}
@@ -292,7 +294,6 @@ public class ScreenReader extends Activity implements OnGestureListener, TextToS
 	@Override
 	public void onUtteranceCompleted(String uttId) {
 		doneSpeaking = true;
-		MobileOCR.getmTts().stop();
 		if (uttId.equals("Instructions") && autoplay < instructions.length) {
 			startPlaying(instructions[autoplay]);
 			autoplay++;
