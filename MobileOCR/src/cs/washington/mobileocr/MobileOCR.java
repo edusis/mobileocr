@@ -5,6 +5,7 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -14,8 +15,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.tts.TextToSpeechBeta;
-import com.google.tts.TextToSpeechBeta.OnInitListener;
 
 /*
  * Team Sparkplugs (Josh Scotland and Hussein Yapit)
@@ -25,9 +24,9 @@ import com.google.tts.TextToSpeechBeta.OnInitListener;
  * TODO: Add logs  Log.d("MOCR","Stop Activity");
  */
 
-public class MobileOCR extends Activity implements OnGestureListener, OnInitListener, TextToSpeechBeta.OnUtteranceCompletedListener {
+public class MobileOCR extends Activity implements OnGestureListener, TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
 
-	private static TextToSpeechBeta mTts;
+	private static TextToSpeech mTts;
 	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
 	//private CountDown counter;
@@ -35,7 +34,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		MobileOCR.setPassedString("He knows a hero when he sees one. Too few characters out there, flying around like that, saving old girls like me. Everybody loves a hero. Years later, they'll tell how they stood in the rain for hours just to get a glimpse of the one who taught them how to hold on a second longer. I believe there's a hero in all of us that keeps us honest, gives us strength, makes us noble, and finally allows us to die with pride, even though sometimes we have to be steady, and give up the thing we want the most. Even our dreams.");
+		MobileOCR.setPassedString("Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?");
 		final Button speak2 = (Button) findViewById(R.id.go);
 		speak2.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -48,7 +47,7 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		});
 		
 		Intent checkIntent = new Intent();
-		checkIntent.setAction(TextToSpeechBeta.Engine.ACTION_CHECK_TTS_DATA);
+		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 
 		gestureScanner = new GestureDetector(this);
@@ -102,21 +101,21 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	protected void onActivityResult(
 			int requestCode, int resultCode, Intent data) {
 		if (requestCode == MY_DATA_CHECK_CODE) {
-			if (resultCode == TextToSpeechBeta.Engine.CHECK_VOICE_DATA_PASS) {
+			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
-				setmTts(new TextToSpeechBeta(this, this));
+				setmTts(new TextToSpeech(this, this));
 			} else {
 				// missing data, install it
 				Intent installIntent = new Intent();
 				installIntent.setAction(
-						TextToSpeechBeta.Engine.ACTION_INSTALL_TTS_DATA);
+						TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
 				startActivity(installIntent);
 			}
 		}
 	}
 
 	@Override
-	public void onInit(int arg0, int arg1) {
+	public void onInit(int arg0) {
 		Log.i("MOCR","TTS Initialization");
 		getmTts().speak("Welcome to the Mobile OCR user interface!", 0, null);
 	}
@@ -166,15 +165,15 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		//Toast mToast = Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT);
 		//mToast.show();
 		mTts.setOnUtteranceCompletedListener(this);
-		HashMap<String, String> myHashAlarm = new HashMap();
-		myHashAlarm.put(TextToSpeechBeta.Engine.KEY_PARAM_UTTERANCE_ID, "ID");
-		mTts.speak("It was a clear black night", TextToSpeechBeta.QUEUE_ADD, myHashAlarm);
+		HashMap<String, String> myHashAlarm = new HashMap<String, String>();
+		myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "ID");
+		mTts.speak("It was a clear black night", TextToSpeech.QUEUE_ADD, myHashAlarm);
 	}
 	
 	@Override
 	public void onUtteranceCompleted(String utteranceId) {
 		//Toast.makeText(getApplicationContext(), "Good!!!!", Toast.LENGTH_SHORT).show();
-		mTts.speak("From MOCR UI", TextToSpeechBeta.QUEUE_ADD, null);
+		mTts.speak("From MOCR UI", TextToSpeech.QUEUE_ADD, null);
 	}
 
 	@Override
@@ -193,11 +192,11 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 		return true;
 	}
 
-	public void setmTts(TextToSpeechBeta mTts) {
+	public void setmTts(TextToSpeech mTts) {
 		MobileOCR.mTts = mTts;
 	}
 
-	public static TextToSpeechBeta getmTts() {
+	public static TextToSpeech getmTts() {
 		return mTts;
 	}
 
@@ -208,6 +207,8 @@ public class MobileOCR extends Activity implements OnGestureListener, OnInitList
 	public static String getPassedString() {
 		return passedString;
 	}
+
+
 
 
 }
