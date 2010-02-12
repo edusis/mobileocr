@@ -1,6 +1,11 @@
+/**
+ * @author - Hussein Yapit
+ */
+
 package cs.washington.mobileocr.tts;
 
 
+import cs.washington.mobileocr.main.OCRThread;
 import cs.washington.mobileocr.main.R;
 import android.content.Context;
 import android.os.Handler;
@@ -14,10 +19,11 @@ public class TTSThread extends HandlerThread{
 	private static TextToSpeech mTts;
 	
 	private static TTSThread ttsThread;
+	private static final String TAG = TTSThread.class.getSimpleName();
 	 
 	private TTSThread()
 	{
-		super(TTSThread.class.getSimpleName());
+		super(TAG);
 		ttsThread = this;
 	}
 	 
