@@ -8,12 +8,15 @@ import java.util.HashMap;
 
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.view.MotionEvent;
 import cs.washington.mobileocr.main.MobileOCR;
 import cs.washington.mobileocr.main.R;
+import cs.washington.mobileocr.main.TextParser;
+import cs.washington.mobileocr.tts.TTSThread;
 
-public class ScreenReaderGestureHandler extends GestureHandler{
+public class ScreenReaderGestureHandler extends GestureHandler implements OnUtteranceCompletedListener{
 
 	private int[] loc = {0,0,0};  // Sentence number, word number, letter number
 	private String[] sentenceArray;
@@ -27,13 +30,21 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
 
-	HashMap<String, String> myHashAlarm = new HashMap<String, String>();
+	//TODO: remove this
+	//HashMap<String, String> myHashAlarm = new HashMap<String, String>();
+	
 	private int autoplay = 0;
 	private Boolean doneSpeaking = true;
 	
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+	
+	public ScreenReaderGestureHandler(String passedString)
+	{
+		super();
+		initialize(passedString);
+	}
 	
 	protected int nextState(int event) {
 		// put statemachine here.
@@ -51,7 +62,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		Log.e("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		if (doneSpeaking) {
-			myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			//MARK myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			if (mode == 0)
 				startPlaying(sentenceArray[loc[0]]);
 			else if (mode == 1)
@@ -64,7 +75,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 			}
 		}
 		else {
-			myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			//MARK myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			stopPlaying();
 		}
 		return false;
@@ -77,7 +88,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			stopPlaying();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
@@ -104,7 +115,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	public boolean onDoubleTap(MotionEvent e) {
 		Log.e("MOCR","Double Tap");
 		stopPlaying();
-		myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
+		TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
 		startPlaying(sentenceArray[loc[0]]);
 		return false;
 	}
@@ -122,6 +133,12 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 			startPlaying(sentenceArray[loc[0]]);
 			doneSpeaking = false;
 		}
+	}
+	
+	private void initialize(String passedString) {
+		sentenceArray = TextParser.sentenceParse(passedString);
+		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
+		wordArray = TextParser.wordParse(passedString);
 	}
 	
 	private void playOnGesture(boolean leftSwipe) {
@@ -220,11 +237,13 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	
 	private void startPlaying(String passedStr) {
 		//MobileOCR.getmTts().speak(passedStr, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
+		//TTSThread.ttsQueueSRMessage(passedStr)
 		doneSpeaking = false;
 	}
 
 	private void stopPlaying() {
 		if (!doneSpeaking)
+			TTSThread.getInstance().ttsStop();
 			//MobileOCR.getmTts().stop();
 		doneSpeaking = true;
 	}
@@ -248,7 +267,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 
 	private void speakInstructions() {
 		stopPlaying();
-		myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
+		TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
 		startPlaying("Currently in: " + modeSpeak[mode]);
 	}
