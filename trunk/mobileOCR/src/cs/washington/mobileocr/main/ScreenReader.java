@@ -3,6 +3,7 @@ package cs.washington.mobileocr.main;
 import java.util.HashMap;
 
 import cs.washington.mobileocr.gestures.ScreenReaderGestureHandler;
+import cs.washington.mobileocr.tts.TTSThread;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -32,19 +33,12 @@ public class ScreenReader extends Activity {
 		Bundle extras = this.getIntent().getExtras();
 		String passedString = null;
 		
-		if (extras != null) {
-			passedString = extras.getString("res");
-		} 
+		passedString = extras != null ? extras.getString("res"): "TEST String";
 		
-		//TODO: move this to ScreenReaderGestureHandler
-		/*sentenceArray = TextParser.sentenceParse(passedString);
-		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
-		wordArray = TextParser.wordParse(passedString);*/
-		
-		//TODO: test TTS, set onUtteranceCompleted on start of activity
-		//MobileOCR.getmTts().setOnUtteranceCompletedListener(this);
-
-		gestureScanner = new GestureDetector(new ScreenReaderGestureHandler());
+		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
+		TTSThread.getInstance().ttsSetContext(this);
+		TTSThread.getInstance().ttsSetUtteranceListener(gHandler);
+		gestureScanner = new GestureDetector(gHandler);
 	}
 
 	@Override
