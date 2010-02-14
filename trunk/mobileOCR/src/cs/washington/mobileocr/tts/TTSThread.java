@@ -18,22 +18,47 @@ import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 
-public class TTSThread extends HandlerThread{
-	private Handler mHandler;
+public class TTSThread {
+	
 	private static boolean mTtsInitialized;
 	private static TextToSpeech mTts;
 	private static TTSThread ttsThread;
 	private static final String TAG = TTSThread.class.getSimpleName();
 	private static final int queueMode = TextToSpeech.QUEUE_FLUSH;
 	private static HashMap<String, String> ttsParams;
-	private Resources res = Resources.getSystem();
-	
+	private Resources res;
+
+	private final Handler mHandler = new Handler() {
+			
+		public void handleMessage(Message msg) {
+			if (mTtsInitialized) {
+				switch (msg.what) {
+				case R.id.tts_init:
+					mTts.speak(res.getString(R.string.ttsInit), queueMode, ttsParams);
+					break;
+				case R.id.tts_welcome:
+					mTts.speak(res.getString(R.string.ttsHello), queueMode, ttsParams);
+					break;
+				case R.id.tts_sreader:
+					mTts.speak((String)msg.obj, queueMode, ttsParams);
+					break;
+				case R.id.tts_quit:
+					getLooper().quit();
+					break;
+				default:
+					super.handleMessage(msg);
+				}
+			}
+		}
+	};
+
 	private TTSThread()
 	{
-		super(TAG);
+
 		ttsThread = this;
 		ttsParams = new HashMap<String, String>();
 		mTtsInitialized = false;
+		//onLooperPrepared();
 	}
 	 
 	public static TTSThread getInstance()
@@ -50,6 +75,10 @@ public class TTSThread extends HandlerThread{
 		mTts = new TextToSpeech(context, ttsInitListener);
 	}
 	 
+	public void ttsSetContext(Context context, Resources res) {
+		ttsSetContext(context);
+		this.res = res;
+	}
 	public boolean ttsSetUtteranceListener (OnUtteranceCompletedListener listener) {
 		if (mTts != null) {
 			mTts.setOnUtteranceCompletedListener(listener);
@@ -82,38 +111,14 @@ public class TTSThread extends HandlerThread{
 			
 		}
 	}
-	protected void onLooperPrepared () {
-		
-		mHandler = new Handler(getLooper()) {
-			
-			public void handleMessage(Message msg) {
-				if (mTtsInitialized) {
-					switch (msg.what) {
-					case R.id.tts_init:
-						mTts.speak(res.getString(R.string.ttsInit), queueMode, ttsParams);
-						break;
-					case R.id.tts_welcome:
-						mTts.speak(res.getString(R.string.ttsHello), queueMode, ttsParams);
-						break;
-					case R.id.tts_sreader:
-						mTts.speak((String)msg.obj, queueMode, ttsParams);
-						break;
-					case R.id.tts_quit:
-						 getLooper().quit();
-						 break;
-					default:
-						super.handleMessage(msg);
-					}
-				}
-			}
-		};
-	}
+	
 	
 	private final static TextToSpeech.OnInitListener ttsInitListener = new TextToSpeech.OnInitListener() {
 
 		public void onInit(int status) {
-			TTSThread.ttsQueueMessage(R.id.tts_init);
 			mTtsInitialized = true;
+			TTSThread.ttsQueueMessage(R.id.tts_init);
+			
 		}
 	};
 }
