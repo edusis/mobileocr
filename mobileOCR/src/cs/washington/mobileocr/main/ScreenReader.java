@@ -36,7 +36,7 @@ public class ScreenReader extends Activity {
 		passedString = extras != null ? extras.getString("res"): "TEST String";
 		
 		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
-		TTSThread.getInstance().ttsSetContext(this);
+		TTSThread.getInstance().ttsSetContext(this, this.getResources());
 		TTSThread.getInstance().ttsSetUtteranceListener(gHandler);
 		gestureScanner = new GestureDetector(gHandler);
 	}
