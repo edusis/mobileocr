@@ -237,14 +237,13 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	
 	private void startPlaying(String passedStr) {
 		//MobileOCR.getmTts().speak(passedStr, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
-		//TTSThread.ttsQueueSRMessage(passedStr)
+		TTSThread.ttsQueueSRMessage(passedStr);
 		doneSpeaking = false;
 	}
 
 	private void stopPlaying() {
 		if (!doneSpeaking)
 			TTSThread.getInstance().ttsStop();
-			//MobileOCR.getmTts().stop();
 		doneSpeaking = true;
 	}
 	
