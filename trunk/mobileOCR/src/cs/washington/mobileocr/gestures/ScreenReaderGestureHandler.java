@@ -60,7 +60,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	}
 	
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		Log.e("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		if (doneSpeaking) {
 			//MARK myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			if (mode == 0)
@@ -82,7 +82,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	}
 	
 	public void onLongPress(MotionEvent e) {
-		Log.e("MOCR","Long Press");
+		Log.d("MOCR","Long Press");
 		speakInstructions();
 	}
 	
@@ -113,7 +113,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	}
 	
 	public boolean onDoubleTap(MotionEvent e) {
-		Log.e("MOCR","Double Tap");
+		Log.d("MOCR","Double Tap");
 		stopPlaying();
 		TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
 		startPlaying(sentenceArray[loc[0]]);
@@ -189,7 +189,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 					//Nothing
 				}
 			}
-			Log.e("MOCR","Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+			Log.d("MOCR","Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
 		else {
 			if (mode == 0) {
@@ -229,14 +229,13 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				}
 				startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 			}
-			Log.e("MOCR","Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+			Log.d("MOCR","Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
 	}
 	
 	
 	
 	private void startPlaying(String passedStr) {
-		//MobileOCR.getmTts().speak(passedStr, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 		TTSThread.ttsQueueSRMessage(passedStr);
 		doneSpeaking = false;
 	}
