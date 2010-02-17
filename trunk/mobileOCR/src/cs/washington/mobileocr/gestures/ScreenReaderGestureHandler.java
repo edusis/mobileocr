@@ -1,20 +1,18 @@
-/**
- * @author - Hussein Yapit
- */
-
 package cs.washington.mobileocr.gestures;
 
-import java.util.HashMap;
-
-import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.view.MotionEvent;
-import cs.washington.mobileocr.main.MobileOCR;
 import cs.washington.mobileocr.main.R;
 import cs.washington.mobileocr.main.TextParser;
-import cs.washington.mobileocr.tts.TTSThread;
+import cs.washington.mobileocr.tts.TTSHandler;
+
+/*
+ * Josh Scotland and Hussein Yapit
+ * This is the screen reader activity
+ * TODO: BUG: on triple swipes or on auto playing, tapping to stop will replay the sentence
+ */
 
 public class ScreenReaderGestureHandler extends GestureHandler implements OnUtteranceCompletedListener{
 
@@ -22,50 +20,47 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	private String[] sentenceArray;
 	private String[] wordArray;
 	private int[] wordsInSentences;
-
-	private int mode = 0;
+	private static final int SENTENCE_MODE = 0;
+	private static final int WORD_MODE = 1;
+	//private static final int LETTER_MODE = 2;
+	private int mode = SENTENCE_MODE;
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
-
 	private String[] instructions = {"Fling up or down to change modes", "Tap to play or pause current text", "Fling left and right to navigate text", "Double tap to play continuously", "Tap and hold to repeat the instructions"};
-
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
 
 	//TODO: remove this
 	//HashMap<String, String> myHashAlarm = new HashMap<String, String>();
-	
+
 	private int autoplay = 0;
 	private Boolean doneSpeaking = true;
-	
+
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-	
-	public ScreenReaderGestureHandler(String passedString)
-	{
+
+	public ScreenReaderGestureHandler(String passedString) {
 		super();
 		initialize(passedString);
 	}
-	
+
 	protected int nextState(int event) {
 		// put statemachine here.
-		switch(mCurrentState)
-		{
+		switch(mCurrentState) {
 		case R.id.state_idle:
 			//in screen reader waiting for input
 			//change state here based on event
 			break;
-			
 		}
 		return 0;
 	}
-	
+
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 		if (doneSpeaking) {
-			//MARK myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
-			if (mode == 0)
+			if (mode == SENTENCE_MODE)
 				startPlaying(sentenceArray[loc[0]]);
-			else if (mode == 1)
+			else if (mode == WORD_MODE)
 				startPlaying(wordArray[loc[1]]);
 			else {
 				if (saySpace != 0)
@@ -73,22 +68,19 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				else
 					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 			}
-		}
-		else {
-			//MARK myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+		} else
 			stopPlaying();
-		}
 		return false;
 	}
-	
+
 	public void onLongPress(MotionEvent e) {
 		Log.d("MOCR","Long Press");
 		speakInstructions();
 	}
-	
+
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			stopPlaying();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
@@ -96,9 +88,8 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				playOnGesture(true);
 			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //right
 				playOnGesture(false);
-			}
-			else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //up
-				if (mode == 0)
+			} else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //up
+				if (mode == SENTENCE_MODE)
 					mode = 3;
 				mode = (mode - 1) % 3;
 				startPlaying(modeSpeak[mode]);
@@ -111,15 +102,15 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 		}
 		return true;
 	}
-	
+
 	public boolean onDoubleTap(MotionEvent e) {
 		Log.d("MOCR","Double Tap");
 		stopPlaying();
-		TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
+		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
 		startPlaying(sentenceArray[loc[0]]);
 		return false;
 	}
-	
+
 	public void onUtteranceCompleted(String uttId) {
 		doneSpeaking = true;
 		if (uttId.equals("Instructions") && autoplay < instructions.length) {
@@ -134,17 +125,17 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 			doneSpeaking = false;
 		}
 	}
-	
+
 	private void initialize(String passedString) {
 		sentenceArray = TextParser.sentenceParse(passedString);
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		wordArray = TextParser.wordParse(passedString);
 	}
-	
+
 	private void playOnGesture(boolean leftSwipe) {
 		saySpace = 0;
 		if (leftSwipe) {
-			if (mode == 0) {
+			if (mode == SENTENCE_MODE) {
 				if (loc[0] > 0) {
 					loc[0]--;
 					if (loc[0] != 0)
@@ -155,7 +146,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				loc[2] = 0;
 				startPlaying(sentenceArray[loc[0]]);
 			}
-			else if (mode == 1) {
+			else if (mode == WORD_MODE) {
 				if (loc[1] > 0) {
 					loc[1]--;
 					if (loc[0] > 0 && loc[1] < wordsInSentences[loc[0] - 1])
@@ -164,7 +155,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				loc[2] = 0;
 				startPlaying(wordArray[loc[1]]);
 			}
-			else {
+			else { //mode == LETTER_MODE
 				if (loc[1] == 0 && loc[2] == 0)
 					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
 				else if (loc[1] >= 0 && loc[2] >= -1) {
@@ -173,26 +164,23 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 						saySpace = 1;
 						startPlaying("space");
 						return;
-					}
-					else if (loc[2] < -1) {
+					} else if (loc[2] < -1) {
 						loc[1]--;
 						loc[2] = wordArray[loc[1]].length() - 1;
-					}
-					else {
+					} else {
 						//Nothing
 					}
 					if (loc[0] > 0 && loc[1] < wordsInSentences[loc[0] - 1])
 						loc[0]--;
 					startPlaying(speakChar(wordArray[loc[1]].charAt(loc[2])));
-				}
-				else {
+				} else {
 					//Nothing
 				}
 			}
 			Log.d("MOCR","Left Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
-		else {
-			if (mode == 0) {
+		else { //right swipe
+			if (mode == SENTENCE_MODE) {
 				if (loc[0] < sentenceArray.length - 1) {
 					loc[0]++;
 					loc[1] = wordsInSentences[loc[0] - 1];
@@ -200,7 +188,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				loc[2] = 0;
 				startPlaying(sentenceArray[loc[0]]);
 			}
-			else if (mode == 1) {
+			else if (mode == WORD_MODE) {
 				if (loc[1] < wordArray.length - 1) {
 					loc[1]++;
 					if (loc[1] >= wordsInSentences[loc[0]])
@@ -209,7 +197,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				loc[2] = 0;
 				startPlaying(wordArray[loc[1]]);
 			}
-			else {
+			else { //mode == LETTER_MODE
 				if (!(loc[1] == wordArray.length - 1 && loc[2] == wordArray[wordArray.length - 1].length() - 1)) {
 					loc[2]++;
 					if (loc[2] == wordArray[loc[1]].length()) {
@@ -232,20 +220,18 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 			Log.d("MOCR","Right Swipe, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		}
 	}
-	
-	
-	
+
 	private void startPlaying(String passedStr) {
-		TTSThread.ttsQueueSRMessage(passedStr);
+		TTSHandler.ttsQueueSRMessage(passedStr);
 		doneSpeaking = false;
 	}
 
 	private void stopPlaying() {
 		if (!doneSpeaking)
-			TTSThread.getInstance().ttsStop();
+			TTSHandler.getInstance().ttsStop();
 		doneSpeaking = true;
 	}
-	
+
 	private String speakChar(char passedChar) {
 		String str = "";
 		switch (passedChar) {
@@ -265,7 +251,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 
 	private void speakInstructions() {
 		stopPlaying();
-		TTSThread.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
+		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
 		startPlaying("Currently in: " + modeSpeak[mode]);
 	}

@@ -1,43 +1,37 @@
 package cs.washington.mobileocr.main;
 
-import java.util.HashMap;
-
 import cs.washington.mobileocr.gestures.ScreenReaderGestureHandler;
-import cs.washington.mobileocr.tts.TTSThread;
-
+import cs.washington.mobileocr.tts.TTSHandler;
 import android.app.Activity;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 
 /*
- * Team Sparkplugs (Josh Scotland and Hussein Yapit)
- * This is the main activity for the MobileOCR application.
- * The application uses text to speech to output information
- * TODO: Fix the space when the person moves on a space, it skips / plays spaces
- * TODO: BUG: on triple swipes or on auto playing, tapping to stop will replay the sentence
+ * Josh Scotland and Hussein Yapit
+ * This is the screen reader activity
+ * TODO: Fix autoplay functions
+ * TODO: Fix not recognizing not playing (i.e. need two taps to play instead of one)
  */
 
 public class ScreenReader extends Activity {
 
 	private GestureDetector gestureScanner;
+	private static final String TAG = TTSHandler.class.getSimpleName();
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.d(TAG, "Screenreader started");
 		setContentView(R.layout.screenreader);
-		
+
 		Bundle extras = this.getIntent().getExtras();
 		String passedString = null;
-		
-		passedString = extras != null ? extras.getString("res"): "TEST String";
-		
+		passedString = extras != null ? extras.getString("res"): "Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?";
+
 		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
-		TTSThread.getInstance().ttsSetContext(this, this.getResources());
-		TTSThread.getInstance().ttsSetUtteranceListener(gHandler);
+		TTSHandler.getInstance().ttsSetContext(this, this.getResources());
+		TTSHandler.getInstance().ttsSetUtteranceListener(gHandler);
 		gestureScanner = new GestureDetector(gHandler);
 	}
 
@@ -45,7 +39,7 @@ public class ScreenReader extends Activity {
 	public boolean onTouchEvent(MotionEvent me) {
 		return gestureScanner.onTouchEvent(me);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
