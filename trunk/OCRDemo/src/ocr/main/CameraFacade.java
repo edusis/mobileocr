@@ -130,7 +130,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
         
     private void setCameraParameters() {
         Camera.Parameters parameters = mCamera.getParameters();
-        parameters.setPreviewSize(mx, my);
+        //parameters.setPreviewSize(mx, my);
+        parameters.setPictureSize(mx, my);
+        
         //parameters.remove("whitebalance"); // theoretically, this might do something helpful
         
         parameters.setPictureFormat(PixelFormat.JPEG);
@@ -195,15 +197,17 @@ public class CameraFacade implements SurfaceHolder.Callback {
             return;
         }
         
-        mCamera.takePicture(shutterCallback, null, jpegCallback);
-        /*mPreviewCaptureInProgress = true;
+        mPreviewCaptureInProgress = true;
+        
+        //mCamera.takePicture(shutterCallback, null, jpegCallback);
+        mPreviewCaptureInProgress = true;
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
           
             public void onPreviewFrame(byte[] data, Camera camera) {
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
                 mUIHandler.sendMessage(msg);
             }
-        });*/
+        });
     }
     
     public void clearPreviewFrame() {
@@ -235,7 +239,8 @@ public class CameraFacade implements SurfaceHolder.Callback {
     private ShutterCallback shutterCallback = new ShutterCallback() {
 
 		public void onShutter() {
-			// TODO Auto-generated method stub
+			setCameraParameters();
+
 		}
     	
     };
@@ -245,7 +250,6 @@ public class CameraFacade implements SurfaceHolder.Callback {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			if (data != null)
 			{
-				mPreviewCaptureInProgress = true;
 				Message picDataMsg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
 				mUIHandler.sendMessage(picDataMsg);
 			}
@@ -253,6 +257,8 @@ public class CameraFacade implements SurfaceHolder.Callback {
 			{
 				mCamera.startPreview();
 			}
+			
+			mPreviewCaptureInProgress = false;
 		}
     	
     };

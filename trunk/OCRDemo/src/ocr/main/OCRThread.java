@@ -68,6 +68,21 @@ public class OCRThread extends HandlerThread {
                 	{
                 		sendOCRRequest(b);
                 	}*/
+                	
+                	/*BitmapFactory.Options options = new BitmapFactory.Options();
+                	options.inSampleSize = 8;
+                	
+                	int test = ((byte[])msg.obj).length;
+                	Bitmap image = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, 49152, options);
+                	
+                	int[] pixels = new int[49152]; //49152
+                	image.getPixels(pixels,0,192,0,0,192,256);
+                	Bitmap ocrImage = Bitmap.createBitmap(image,0,0,192, 256);
+                	//Bitmap ocrImage = Bitmap.createBitmap(pixels, msg.arg2, msg.arg1, Bitmap.Config.ARGB_8888);
+                	if (ocrImage != null)
+                	{
+                		sendOCRRequest(ocrImage);
+                	}*/
                 	sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
                     //sendOCRRequest(detectWord((byte[])msg.obj, msg.arg1, msg.arg2));
                     break;

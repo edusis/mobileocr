@@ -49,6 +49,7 @@ public class OCRDemo extends Activity {
     
     private TextView mResultText = null;
     
+    //TODO: put in facade
     private static final int AUTOFOCUS_UNKNOWN = 0;
     private static final int AUTOFOCUS_SUCCESS = 1;
     private static final int AUTOFOCUS_FAILURE = 2;
