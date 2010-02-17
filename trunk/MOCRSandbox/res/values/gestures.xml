@@ -1,4 +1,0 @@
-<resources>
-	<item type="id" name="event_longpress"/>
-	<item type="id" name="event_tap"/>
-</resources>
