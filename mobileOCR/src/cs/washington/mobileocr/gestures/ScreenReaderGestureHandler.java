@@ -16,6 +16,8 @@ import cs.washington.mobileocr.tts.TTSHandler;
 
 public class ScreenReaderGestureHandler extends GestureHandler implements OnUtteranceCompletedListener{
 
+	private String TAG = this.getClass().getSimpleName();
+
 	private int[] loc = {0,0,0};  // Sentence number, word number, letter number
 	private String[] sentenceArray;
 	private String[] wordArray;
@@ -27,9 +29,6 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
 	private String[] instructions = {"Fling up or down to change modes", "Tap to play or pause current text", "Fling left and right to navigate text", "Double tap to play continuously", "Tap and hold to repeat the instructions"};
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
-
-	//TODO: remove this
-	//HashMap<String, String> myHashAlarm = new HashMap<String, String>();
 
 	private int autoplay = 0;
 	private Boolean doneSpeaking = true;
@@ -89,8 +88,10 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {  //right
 				playOnGesture(false);
 			} else if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //up
-				if (mode == SENTENCE_MODE)
+				if (mode == SENTENCE_MODE) {
 					mode = 3;
+				}
+				
 				mode = (mode - 1) % 3;
 				startPlaying(modeSpeak[mode]);
 			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //down
@@ -98,7 +99,8 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 				startPlaying(modeSpeak[mode]);
 			}
 		} catch (Exception e) {
-			// nothing
+			//Hussein
+			Log.e(TAG, "Exception on fling. Details: " + e.toString());
 		}
 		return true;
 	}
