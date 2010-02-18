@@ -20,7 +20,7 @@ public class TTSHandler {
 	private static boolean mTtsInitialized;
 	private static TextToSpeech mTts;
 	private static TTSHandler ttsThread;
-	private static final String TAG = TTSHandler.class.getSimpleName();
+	private static final String TAG = "TTS";
 	private static final int queueMode = TextToSpeech.QUEUE_FLUSH;
 	private static HashMap<String, String> ttsParams;
 	private Resources res;
@@ -29,20 +29,19 @@ public class TTSHandler {
 		public void handleMessage(Message msg) {
 			if (mTtsInitialized) {
 				switch (msg.what) {
-				case R.id.tts_init:
-					mTts.speak(res.getString(R.string.ttsInit), queueMode, ttsParams);
-					break;
-				case R.id.tts_welcome:
-					mTts.speak(res.getString(R.string.ttsHello), queueMode, ttsParams);
-					break;
-				case R.id.tts_sreader:
+
+				case R.id.screenreader_tts:
 					mTts.speak((String)msg.obj, queueMode, ttsParams);
 					break;
-				case R.id.tts_quit:
-					getLooper().quit();
-					break;
 				default:
-					super.handleMessage(msg);
+					String ttsText = res.getString(msg.what);
+					
+					if (ttsText != null) {
+						mTts.speak(ttsText, queueMode, ttsParams);
+					}
+					else {
+						Log.e(TAG , "TTS text undefined in resources." );
+					}
 				}
 			}
 		}
@@ -52,7 +51,6 @@ public class TTSHandler {
 		ttsThread = this;
 		ttsParams = new HashMap<String, String>();
 		mTtsInitialized = false;
-		//onLooperPrepared();
 	}
 
 	public static TTSHandler getInstance() {
@@ -85,7 +83,7 @@ public class TTSHandler {
 	}
 
 	public static void ttsQueueSRMessage(String text) {
-		Message msg = TTSHandler.getInstance().mHandler.obtainMessage(R.id.tts_sreader, text);
+		Message msg = TTSHandler.getInstance().mHandler.obtainMessage(R.id.screenreader_tts, text);
 		TTSHandler.getInstance().mHandler.sendMessage(msg);
 	}
 
@@ -106,7 +104,7 @@ public class TTSHandler {
 		public void onInit(int status) {
 			Log.d(TAG, "TTS init");
 			mTtsInitialized = true;
-			TTSHandler.ttsQueueMessage(R.id.tts_init);
+			TTSHandler.ttsQueueMessage(R.string.tts_init);
 		}
 	};
 }

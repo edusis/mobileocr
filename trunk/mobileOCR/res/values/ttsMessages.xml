@@ -1,8 +1,0 @@
-<resources>
-	<item type="id" name="tts_welcome"/>
-	<item type="id" name="tts_helpOn"/>
-	<item type="id" name="tts_helpOff"/>
-	<item type="id" name="tts_quit"/>
-	<item type="id" name="tts_init"/>
-	<item type="id" name="tts_sreader"/>
-</resources>
