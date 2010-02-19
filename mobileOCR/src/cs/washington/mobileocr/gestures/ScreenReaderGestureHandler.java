@@ -23,14 +23,11 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	private int[] wordsInSentences;
 	private static final int SENTENCE_MODE = 0;
 	private static final int WORD_MODE = 1;
-	//private static final int LETTER_MODE = 2;
 	private int mode = SENTENCE_MODE;
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
-	private String[] instructions = {"Fling up or down to change modes", "Tap to play or pause current text", "Fling left and right to navigate text", "Double tap to play continuously", "Tap and hold to repeat the instructions"};
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
 
 	private int autoplay = 0;
-	//private Boolean doneSpeaking = true;
 
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -73,7 +70,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 
 	public void onLongPress(MotionEvent e) {
 		Log.d("MOCR","Long Press");
-		speakInstructions();
+		startPlaying("Currently in: " + modeSpeak[mode] + ". Fling up or down to change modes. Tap to play or pause current text. Fling left and right to navigate text. Double tap to play continuously. Tap and hold to repeat the instructions");
 	}
 
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -90,7 +87,6 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 				if (mode == SENTENCE_MODE) {
 					mode = 3;
 				}
-				
 				mode = (mode - 1) % 3;
 				startPlaying(modeSpeak[mode]);
 			} else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {  //down
@@ -231,13 +227,4 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 		}
 		return str;
 	}
-
-	private void speakInstructions() {
-		stopPlaying();
-		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
-		autoplay = 0;
-		startPlaying("Currently in: " + modeSpeak[mode] + ".");
-	}
-
-	
 }

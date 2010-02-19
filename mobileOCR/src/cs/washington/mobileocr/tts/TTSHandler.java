@@ -24,7 +24,6 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
 	private HashMap<String, String> ttsParams;
 	private Resources res;
-	
 	private static Boolean doneSpeaking = true;
 
 	private final Handler mHandler = new Handler() {
@@ -37,7 +36,6 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 					break;
 				default:
 					String ttsText = res.getString(msg.what);
-					
 					if (ttsText != null) {
 						mTts.speak(ttsText, queueMode, ttsParams);
 					}
@@ -107,13 +105,7 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 
 	public void onUtteranceCompleted(String uttId) {
 		setDoneSpeaking(true);
-		Log.e(TAG, "UtteranceListener complete");
 		/*
-		if (uttId.equals("Instructions") && autoplay < instructions.length) {
-			startPlaying(instructions[autoplay]);
-			autoplay++;
-			doneSpeaking = false;
-		}
 		if (uttId.equals("Sentences") && loc[0] < sentenceArray.length - 1) {
 			loc[1] = wordsInSentences[loc[0]];
 			loc[0]++;
