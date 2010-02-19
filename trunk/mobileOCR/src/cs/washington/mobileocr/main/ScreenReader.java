@@ -30,12 +30,8 @@ public class ScreenReader extends Activity {
 		String passedString = null;
 		passedString = extras != null ? extras.getString("res"): "Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?";
 
-		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
 		TTSHandler.getInstance().ttsSetContext(this, this.getResources());
-		
-		if (!TTSHandler.getInstance().ttsSetUtteranceListener(gHandler)) {
-			Log.e(TAG, "UtteranceListener not set");
-		}
+		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
 		
 		gestureScanner = new GestureDetector(gHandler);
 	}

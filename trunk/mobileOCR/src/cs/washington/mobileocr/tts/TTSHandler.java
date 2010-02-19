@@ -15,21 +15,23 @@ import android.util.Log;
  * A TTS handler to play, pause, and queue TTS
  */
 
-public class TTSHandler {
+public class TTSHandler implements OnUtteranceCompletedListener{
 
 	private static boolean mTtsInitialized;
-	private TextToSpeech mTts;
+	private static TextToSpeech mTts;
 	private static TTSHandler ttsThread;
 	private final static String TAG = "TTS";
 	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
 	private HashMap<String, String> ttsParams;
 	private Resources res;
+	
+	private static Boolean doneSpeaking = true;
 
 	private final Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			if (mTtsInitialized) {
+				setDoneSpeaking(false);
 				switch (msg.what) {
-
 				case R.id.screenreader_tts:
 					mTts.speak((String)msg.obj, queueMode, ttsParams);
 					break;
@@ -69,14 +71,6 @@ public class TTSHandler {
 		this.res = res;
 	}
 
-	public boolean ttsSetUtteranceListener (OnUtteranceCompletedListener listener) {
-		if (mTts != null) {
-			mTts.setOnUtteranceCompletedListener(listener);
-			return true;
-		}
-		return false;
-	}
-
 	public static void ttsQueueMessage(int type) {
 		Message msg = TTSHandler.getInstance().mHandler.obtainMessage(type);
 		TTSHandler.getInstance().mHandler.sendMessage(msg);
@@ -96,15 +90,44 @@ public class TTSHandler {
 	}
 
 	public void ttsStop() {
-		if (mTts != null)
+		if (mTts != null) {
 			mTts.stop();
+			setDoneSpeaking(true);
+		}
 	}
 
 	private final static TextToSpeech.OnInitListener ttsInitListener = new TextToSpeech.OnInitListener() {
 		public void onInit(int status) {
 			Log.d(TAG, "TTS init");
 			mTtsInitialized = true;
+			mTts.setOnUtteranceCompletedListener(TTSHandler.getInstance());
 			TTSHandler.ttsQueueMessage(R.string.tts_init);
 		}
 	};
+
+	public void onUtteranceCompleted(String uttId) {
+		setDoneSpeaking(true);
+		Log.e(TAG, "UtteranceListener complete");
+		/*
+		if (uttId.equals("Instructions") && autoplay < instructions.length) {
+			startPlaying(instructions[autoplay]);
+			autoplay++;
+			doneSpeaking = false;
+		}
+		if (uttId.equals("Sentences") && loc[0] < sentenceArray.length - 1) {
+			loc[1] = wordsInSentences[loc[0]];
+			loc[0]++;
+			startPlaying(sentenceArray[loc[0]]);
+			doneSpeaking = false;
+		}
+		*/
+	}
+
+	public void setDoneSpeaking(Boolean doneSpeaking) {
+		TTSHandler.doneSpeaking = doneSpeaking;
+	}
+
+	public static Boolean getDoneSpeaking() {
+		return doneSpeaking;
+	}
 }
