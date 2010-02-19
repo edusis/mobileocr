@@ -47,6 +47,9 @@ public class MobileOCR extends Activity {
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
+		
+		Intent myIntent = new Intent(this, ScreenReader.class);
+		startActivity(myIntent);
 
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -106,8 +109,8 @@ public class MobileOCR extends Activity {
 
 	protected void onResume() {
 		Log.d(TAG, "onResume");
-		startOCRThread();
-		cameraFacade.onResume();
+		//startOCRThread();
+		//cameraFacade.onResume();
 		super.onResume();
 	}
 

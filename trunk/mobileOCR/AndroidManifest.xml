@@ -5,16 +5,14 @@
       android:versionName="1.0">
     <application android:icon="@drawable/icon" android:label="@string/app_name"
     			 android:name=".OCRApplication" android:debuggable="true">
-        <activity android:name=".MobileOCR"
+                <activity android:name=".MobileOCR"
                   android:label="@string/app_name">
-            
-        </activity>
-		<activity android:name=".ScreenReader"
-   				  android:label="@string/app_name">
-			<intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+		<activity android:name=".ScreenReader">
 		</activity>
     </application>
 
