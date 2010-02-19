@@ -1,6 +1,8 @@
 package cs.washington.mobileocr.tts;
 
 import java.util.HashMap;
+
+import cs.washington.mobileocr.gestures.ScreenReaderGestureHandler;
 import cs.washington.mobileocr.main.R;
 import android.content.Context;
 import android.content.res.Resources;
@@ -104,15 +106,13 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 	};
 
 	public void onUtteranceCompleted(String uttId) {
+		Log.e(TAG, "Utterance Complete");
 		setDoneSpeaking(true);
-		/*
-		if (uttId.equals("Sentences") && loc[0] < sentenceArray.length - 1) {
-			loc[1] = wordsInSentences[loc[0]];
-			loc[0]++;
-			startPlaying(sentenceArray[loc[0]]);
-			doneSpeaking = false;
+		if (uttId.equals("Sentences")) {
+			Log.e(TAG, "Utterance Sentences");
+			ScreenReaderGestureHandler.autoplaySentences();
+			setDoneSpeaking(false);
 		}
-		*/
 	}
 
 	public void setDoneSpeaking(Boolean doneSpeaking) {
