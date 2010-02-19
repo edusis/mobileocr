@@ -55,7 +55,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
-		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 		if (doneSpeaking) {
 			if (mode == SENTENCE_MODE)
 				startPlaying(sentenceArray[loc[0]]);
@@ -79,7 +79,7 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
-			TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 			stopPlaying();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
@@ -108,11 +108,12 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 	public boolean onDoubleTap(MotionEvent e) {
 		Log.d("MOCR","Double Tap");
 		stopPlaying();
-		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
+		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
 		startPlaying(sentenceArray[loc[0]]);
 		return false;
 	}
 
+	@Override
 	public void onUtteranceCompleted(String uttId) {
 		doneSpeaking = true;
 		if (uttId.equals("Instructions") && autoplay < instructions.length) {
@@ -253,8 +254,10 @@ public class ScreenReaderGestureHandler extends GestureHandler implements OnUtte
 
 	private void speakInstructions() {
 		stopPlaying();
-		TTSHandler.setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
+		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Instructions");
 		autoplay = 0;
-		startPlaying("Currently in: " + modeSpeak[mode]);
+		startPlaying("Currently in: " + modeSpeak[mode] + ".");
 	}
+
+	
 }
