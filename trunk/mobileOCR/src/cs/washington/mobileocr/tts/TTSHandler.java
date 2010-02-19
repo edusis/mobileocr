@@ -18,11 +18,11 @@ import android.util.Log;
 public class TTSHandler {
 
 	private static boolean mTtsInitialized;
-	private static TextToSpeech mTts;
+	private TextToSpeech mTts;
 	private static TTSHandler ttsThread;
-	private static final String TAG = "TTS";
-	private static final int queueMode = TextToSpeech.QUEUE_FLUSH;
-	private static HashMap<String, String> ttsParams;
+	private final static String TAG = "TTS";
+	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
+	private HashMap<String, String> ttsParams;
 	private Resources res;
 
 	private final Handler mHandler = new Handler() {
@@ -87,11 +87,11 @@ public class TTSHandler {
 		TTSHandler.getInstance().mHandler.sendMessage(msg);
 	}
 
-	public static void setParam(String key, String value) {
+	public void setParam(String key, String value) {
 		ttsParams.put(key, value);
 	}
 
-	public static void clearParams() {
+	public void clearParams() {
 		ttsParams.clear();
 	}
 

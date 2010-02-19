@@ -28,7 +28,7 @@ public class ScreenReader extends Activity {
 
 		Bundle extras = this.getIntent().getExtras();
 		String passedString = null;
-		passedString = extras != null ? extras.getString("res"): getString(R.string.tts_demo);
+		passedString = extras != null ? extras.getString("res"): "Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?";
 
 		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
 		TTSHandler.getInstance().ttsSetContext(this, this.getResources());
