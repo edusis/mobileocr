@@ -11,8 +11,7 @@ import android.view.MotionEvent;
 /*
  * Josh Scotland and Hussein Yapit
  * This is the screen reader activity
- * TODO: Fix autoplay functions
- * TODO: Fix not recognizing not playing (i.e. need two taps to play instead of one)
+ * TODO: Fix bug where it hangs after initialization
  */
 
 public class ScreenReader extends Activity {

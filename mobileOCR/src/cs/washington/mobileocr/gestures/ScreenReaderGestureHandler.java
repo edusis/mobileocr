@@ -13,21 +13,20 @@ import cs.washington.mobileocr.tts.TTSHandler;
  * TODO: BUG: on triple swipes or on auto playing, tapping to stop will replay the sentence
  */
 
-public class ScreenReaderGestureHandler extends GestureHandler{
+public class ScreenReaderGestureHandler extends GestureHandler {
 
 	private String TAG = this.getClass().getSimpleName();
 
-	private int[] loc = {0,0,0};  // Sentence number, word number, letter number
-	private String[] sentenceArray;
+	private static int[] loc = {0,0,0};  // Sentence number, word number, letter number
+	private static String[] sentenceArray;
 	private String[] wordArray;
-	private int[] wordsInSentences;
+	private static int[] wordsInSentences;
 	private static final int SENTENCE_MODE = 0;
 	private static final int WORD_MODE = 1;
 	private int mode = SENTENCE_MODE;
 	private String[] modeSpeak = {"Sentence Mode", "Word Mode", "Letter Mode"};
 	private int saySpace = 0; // 0 for don't say space, 1 for say space when moving right, 2 for say space when moving left
-
-	private int autoplay = 0;
+	private static Boolean autoplay = false;
 
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
@@ -52,6 +51,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+		autoplay = false;
 		if (TTSHandler.getDoneSpeaking()) {
 			if (mode == SENTENCE_MODE)
 				startPlaying(sentenceArray[loc[0]]);
@@ -76,6 +76,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		try {
 			TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
+			autoplay = false;
 			stopPlaying();
 			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
 				return false;
@@ -103,6 +104,7 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 		Log.d("MOCR","Double Tap");
 		stopPlaying();
 		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Sentences");
+		autoplay = true;
 		startPlaying(sentenceArray[loc[0]]);
 		return false;
 	}
@@ -202,14 +204,22 @@ public class ScreenReaderGestureHandler extends GestureHandler{
 		}
 	}
 
-	private void startPlaying(String passedStr) {
+	private static void startPlaying(String passedStr) {
 		TTSHandler.ttsQueueSRMessage(passedStr);
 	}
 
 	private void stopPlaying() {
-		if (!TTSHandler.getDoneSpeaking())
-			TTSHandler.getInstance().ttsStop();
+		TTSHandler.getInstance().ttsStop();
 	}
+	
+	public static void autoplaySentences() {
+		if (loc[0] < sentenceArray.length - 1 && autoplay) {
+			loc[1] = wordsInSentences[loc[0]];
+			loc[0]++;
+			startPlaying(sentenceArray[loc[0]]);
+		}
+	}
+
 
 	private String speakChar(char passedChar) {
 		String str = "";
