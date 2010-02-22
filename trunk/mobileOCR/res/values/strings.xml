@@ -5,7 +5,7 @@
     <string name="pref_weocr_server_default">http://appsv.ocrgrid.org/cgi-bin/weocr/submit_tesseract.cgi</string>
     
     <string name="tts_hello">Hello.</string>
-    <string name="tts_demo">"Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?"</string>
+    <string name="tts_passedstring">"Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?"</string>
     <string name="tts_helpOn">Help turned on.</string>
     <string name="tts_init">TTS started</string>
 </resources>

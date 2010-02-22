@@ -26,22 +26,16 @@ import android.view.WindowManager;
 
 public class MobileOCR extends Activity {
 
-	private static TextToSpeech mTts;
 	private GestureDetector gestureScanner;
-
 	private static final String TAG = "MobileOCR";
-
 	private ConnectivityManager mConnectivityManager;
-
 	private CameraFacade cameraFacade;
 	private OCRThread mOCRThread;
-
-	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		//clear title bar and notification bar
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |

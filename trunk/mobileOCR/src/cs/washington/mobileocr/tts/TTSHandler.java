@@ -106,16 +106,15 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 	};
 
 	public void onUtteranceCompleted(String uttId) {
-		Log.e(TAG, "Utterance Complete");
+		Log.d(TAG, "Utterance Complete");
 		setDoneSpeaking(true);
 		if (uttId.equals("Sentences")) {
-			Log.e(TAG, "Utterance Sentences");
 			ScreenReaderGestureHandler.autoplaySentences();
 			setDoneSpeaking(false);
 		}
 	}
 
-	public void setDoneSpeaking(Boolean doneSpeaking) {
+	public static void setDoneSpeaking(Boolean doneSpeaking) {
 		TTSHandler.doneSpeaking = doneSpeaking;
 	}
 

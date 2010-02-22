@@ -16,7 +16,6 @@ import cs.washington.mobileocr.tts.TTSHandler;
 public class ScreenReaderGestureHandler extends GestureHandler {
 
 	private String TAG = this.getClass().getSimpleName();
-
 	private static int[] loc = {0,0,0};  // Sentence number, word number, letter number
 	private static String[] sentenceArray;
 	private String[] wordArray;
@@ -219,7 +218,6 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 			startPlaying(sentenceArray[loc[0]]);
 		}
 	}
-
 
 	private String speakChar(char passedChar) {
 		String str = "";
