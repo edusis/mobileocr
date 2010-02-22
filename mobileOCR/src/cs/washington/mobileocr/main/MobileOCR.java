@@ -36,21 +36,18 @@ public class MobileOCR extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		//clear title bar and notification bar
+		//Remove title bar
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		
-		Intent myIntent = new Intent(this, ScreenReader.class);
-		startActivity(myIntent);
+		//Intent myIntent = new Intent(this, ScreenReader.class);
+		//startActivity(myIntent);
 
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-
 		SurfaceView view = new SurfaceView(this);
-
 		cameraFacade = new CameraFacade(view.getHolder(), mHandler);
-
 		setContentView(view);
 
 		//initialize gesture detector
@@ -66,7 +63,7 @@ public class MobileOCR extends Activity {
 		if (requestCode == MY_DATA_CHECK_CODE) {
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
-				TTSHandler.getInstance().ttsSetContext(this);
+				TTSHandler.getInstance().ttsSetContext(this, this.getResources());
 				Log.d(TAG, "TTS engine check");
 			} else {
 				// missing data, install it
@@ -116,7 +113,6 @@ public class MobileOCR extends Activity {
 	}
 
 	private void sendOCRRequest(final Bitmap textBitmap) {
-
 		Handler ocrHandler = mOCRThread.getHandler();
 		Message ocrMessage = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, textBitmap);
 		ocrHandler.sendMessage(ocrMessage);
