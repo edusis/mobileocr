@@ -35,15 +35,12 @@ public class MobileOCR extends Activity {
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		//Remove title bar
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
-		
-		//Intent myIntent = new Intent(this, ScreenReader.class);
-		//startActivity(myIntent);
 
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		SurfaceView view = new SurfaceView(this);
@@ -74,10 +71,8 @@ public class MobileOCR extends Activity {
 		}
 	}
 
-	public boolean onTouchEvent(MotionEvent event)
-	{
+	public boolean onTouchEvent(MotionEvent event) {
 		return gestureScanner.onTouchEvent(event);
-
 	}
 
 	private void startOCRThread () {
@@ -129,16 +124,22 @@ public class MobileOCR extends Activity {
 				cameraFacade.requestPreviewFrame();
 			}
 			return true;
+		} else if (keyCode == KeyEvent.KEYCODE_MENU) {
+			if (event.getRepeatCount() == 0) {
+				startScreenReaderView("Hi");
+			}
+			return true;
 		} else {
 			return super.onKeyDown(keyCode, event);
 		}
 	}
 
-	private void startScreenReaderView(String result)
-	{
-		Intent i = new Intent(this, ScreenReader.class);
-		i.putExtra("resultString", result);
-		startActivity (i);
+	public void startScreenReaderView(String result) {
+		//Intent i = new Intent(this, ScreenReader.class);
+		//i.putExtra("resultString", result);
+		//startActivity (i);
+		Intent myIntent = new Intent(this, ScreenReader.class);
+		startActivity(myIntent);
 	}
 
 	private final Handler mHandler = new Handler () {
@@ -155,18 +156,14 @@ public class MobileOCR extends Activity {
 				break;
 			case R.id.msg_camera_preview_frame:
 				Handler ocrHandler = mOCRThread.getHandler();
-
 				int width = cameraFacade.getWidth();
 				int height = cameraFacade.getHeight();
 				Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
 				ocrHandler.sendMessage(preprocessMsg);
 				break;
 			case R.id.msg_ui_ocr_success:
-
 				cameraFacade.onPause();
-
 				startScreenReaderView((String)msg.obj);
-
 				break;
 			case R.id.msg_ui_ocr_fail:
 				cameraFacade.startPreview();

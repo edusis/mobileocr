@@ -48,7 +48,7 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 	}
 
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+		Log.d(TAG,"Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 		autoplay = false;
 		if (TTSHandler.getDoneSpeaking()) {
@@ -68,7 +68,7 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 	}
 
 	public void onLongPress(MotionEvent e) {
-		Log.d("MOCR","Long Press");
+		Log.d(TAG,"Long Press");
 		startPlaying("Currently in: " + modeSpeak[mode] + ". Fling up or down to change modes. Tap to play or pause current text. Fling left and right to navigate text. Double tap to play continuously. Tap and hold to repeat the instructions");
 	}
 
