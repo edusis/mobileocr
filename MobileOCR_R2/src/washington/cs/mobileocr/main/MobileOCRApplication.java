@@ -1,12 +1,10 @@
 package washington.cs.mobileocr.main;
 
 import washington.cs.mobileocr.main.R;
-import washington.cs.mobileocr.main.R.string;
 import washington.cs.mobileocr.weocr.WeOCRClient;
 import washington.cs.mobileocr.weocr.WeOCRServerList;
 import android.app.Application;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 
 public class MobileOCRApplication extends Application {

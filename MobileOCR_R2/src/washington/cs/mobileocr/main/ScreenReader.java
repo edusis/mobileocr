@@ -41,7 +41,6 @@ public class ScreenReader extends Activity {
 		TextView text = (TextView) findViewById(R.id.text);
         text.setText(passedString);
         
-		TTSHandler.getInstance().ttsSetContext(this, this.getResources());
 		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
 		
 		gestureScanner = new GestureDetector(gHandler);
