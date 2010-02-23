@@ -100,20 +100,17 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		public void onInit(int status) {
 			Log.d(TAG, "TTS init");
 			mTtsInitialized = true;
-			
 			//NOTE: part of spaghetti code.
 			mTts.setOnUtteranceCompletedListener(TTSHandler.getInstance());
-			//TTSHandler.ttsQueueMessage(R.string.tts_init);
+			TTSHandler.ttsQueueMessage(R.string.tts_init);
 		}
 	};
 
 	//NOTE: spaghetti code. when there's time move to ScreenReaderGestureHandler.
 	public void onUtteranceCompleted(String uttId) {
-		Log.e(TAG, "Utterance Complete");
+		Log.d(TAG, "Utterance Complete");
 		setDoneSpeaking(true);
 		if (uttId.equals("Sentences")) {
-			Log.e(TAG, "Utterance Sentences");
-
 			ScreenReaderGestureHandler.autoplaySentences();
 			setDoneSpeaking(false);
 		}
