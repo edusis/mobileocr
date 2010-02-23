@@ -41,7 +41,6 @@ public class MobileOCR extends Activity {
 	private CameraFacade cameraFacade;
 	private OCRThread mOCRThread;
 
-	private static String passedString;
 	private int MY_DATA_CHECK_CODE;
 
 	public void onCreate(Bundle savedInstanceState) {

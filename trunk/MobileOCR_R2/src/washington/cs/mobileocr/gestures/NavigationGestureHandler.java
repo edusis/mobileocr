@@ -5,7 +5,6 @@
 
 package washington.cs.mobileocr.gestures;
 
-import washington.cs.mobileocr.main.MobileOCR;
 import washington.cs.mobileocr.main.R;
 import washington.cs.mobileocr.tts.TTSHandler;
 import android.view.MotionEvent;
@@ -19,7 +18,8 @@ public class NavigationGestureHandler extends GestureHandler{
 	
 	public void onLongPress(MotionEvent e) {
 		//TODO: need to create abstraction - mobileocr
-		
+		TTSHandler.ttsQueueMessage(R.string.tts_nav_instruction);
+		/*
 		if (MobileOCR.instructionFlag) {
 			TTSHandler.ttsQueueMessage(R.string.tts_nav_instruction);
 		} else {
@@ -27,6 +27,7 @@ public class NavigationGestureHandler extends GestureHandler{
 		}
 		
 		MobileOCR.instructionFlag = !MobileOCR.instructionFlag;
+		*/
 	}
 
 }
