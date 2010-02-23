@@ -80,8 +80,8 @@ public class MobileOCR extends Activity {
 		if (requestCode == MY_DATA_CHECK_CODE) {
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
-				TTSHandler.getInstance().ttsSetContext(this);
 				Log.d(TAG, "TTS engine check");
+				TTSHandler.getInstance().ttsSetContext(this, this.getResources());
 			} else {
 				// missing data, install it
 				Intent installIntent = new Intent();
@@ -116,12 +116,9 @@ public class MobileOCR extends Activity {
 
 	protected void onResume() {
 		Log.d(TAG, "onResume");
-		
 		super.onResume();
 		startOCRThread();
-		
 		cameraFacade.onResume();
-		
 	}
 
 	protected void onPause() {
@@ -133,7 +130,6 @@ public class MobileOCR extends Activity {
 		//store preferences
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = state.edit();
-		
 		editor.putBoolean(INSTRUCTION_KEY, instructionFlag);
 	}
 
@@ -161,8 +157,7 @@ public class MobileOCR extends Activity {
 	}
 
 	//creates an intent to start ScreenReader Activity
-	private void startScreenReaderView(String result)
-	{
+	private void startScreenReaderView(String result) {
 		Intent i = new Intent(this, ScreenReader.class);
 		i.putExtra("resultString", result);
 		startActivity (i);
