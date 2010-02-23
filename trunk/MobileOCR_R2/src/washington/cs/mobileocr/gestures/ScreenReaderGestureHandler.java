@@ -113,6 +113,10 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 		sentenceArray = TextParser.sentenceParse(passedString);
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		wordArray = TextParser.wordParse(passedString);
+		loc[0] = loc[1] = loc[2] = 0;
+		mode = SENTENCE_MODE;
+		saySpace = 0;
+		autoplay = false;
 	}
 
 	private void playOnGesture(boolean leftSwipe) {
