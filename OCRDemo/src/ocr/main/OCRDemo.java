@@ -4,10 +4,14 @@
 
 package ocr.main;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 import ocr.main.OCRThread;
@@ -142,6 +146,19 @@ public class OCRDemo extends Activity {
 					cameraFacade.requestPreviewFrame();
 				break;
 			case R.id.msg_camera_preview_frame:
+				
+				/*try {
+					int width = cameraFacade.getWidth();
+					int height = cameraFacade.getHeight();
+					int length = ((byte[])msg.obj).length;
+					Socket socket = new Socket("morris.cs.washington.edu", 9897);
+					DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+					dos.write((byte[])msg.obj);
+					dos.close();
+					
+				} catch (Exception e) {
+					Log.e("MobileOCR", e.toString());
+				}*/
 				mProcessingInProgress = true;
                 Handler ocrHandler = mOCRThread.getHandler();
                 

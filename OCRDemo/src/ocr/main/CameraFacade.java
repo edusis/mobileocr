@@ -1,6 +1,7 @@
 package ocr.main;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import ocr.main.R;
 
@@ -204,6 +205,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
           
             public void onPreviewFrame(byte[] data, Camera camera) {
+            	
+            	
+            	
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
                 mUIHandler.sendMessage(msg);
             }

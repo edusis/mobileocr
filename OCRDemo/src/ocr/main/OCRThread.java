@@ -1,8 +1,10 @@
 package ocr.main;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 import ocr.main.FileDumpUtil;
 
@@ -83,6 +85,7 @@ public class OCRThread extends HandlerThread {
                 	{
                 		sendOCRRequest(ocrImage);
                 	}*/
+                	
                 	sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
                     //sendOCRRequest(detectWord((byte[])msg.obj, msg.arg1, msg.arg2));
                     break;
