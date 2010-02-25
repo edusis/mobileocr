@@ -19,9 +19,11 @@
 package ocr.weocr;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import org.apache.http.entity.AbstractHttpEntity;
 
@@ -66,7 +68,16 @@ public class WeOCRFormEntity extends AbstractHttpEntity {
         img.compress(CompressFormat.JPEG, quality, imageStream);
         imageStream.close();
         
-        mImageStream = imageStream;
+        try {
+			Socket socket = new Socket("morris.cs.washington.edu", 9897);
+			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+			dos.write(imageStream.toByteArray());
+			dos.close();
+			
+		} catch (Exception e) {
+			
+		}
+        //mImageStream = imageStream;
         setContentType(CONTENT_TYPE);
         setChunked(false);
     }

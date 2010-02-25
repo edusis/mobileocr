@@ -2,5 +2,5 @@
 <resources>
     <string name="hello">Hello World, OCRDemo!</string>
     <string name="app_name">OCRDemo</string>
-    <string name="pref_weocr_server_default">http://appsv.ocrgrid.org/cgi-bin/weocr/submit_tesseract.cgi</string>
+    <string name="pref_weocr_server_default">http://abstract.cs.washington.edu/~yapith/form.php</string>
 </resources>

@@ -287,6 +287,8 @@ public class GrayImage extends GrayMatrix {
     				}
     			}
     		}
+    
+    
     /**
      * Adaptive mean filter for grayscale image, using a square filter of given radius.
      * 
