@@ -10,11 +10,16 @@ public class ServerMain {
 	
 	public static void main(String[] args) {
 		
+		System.out.println("[  OK  ] Server started.");
 		try {
 			mobileListen = new ServerSocket(MOBILE_PORT);
 			
+			
 			while(true) {
+				System.out.println("[  OK  ] Waiting for connection..");
 				Socket clientSocket = mobileListen.accept();
+				
+				System.out.println("[  OK  ] Connection established");
 				ConnectionHandler cc = new ConnectionHandler(clientSocket);
 			}
 		}catch(Exception e) {
