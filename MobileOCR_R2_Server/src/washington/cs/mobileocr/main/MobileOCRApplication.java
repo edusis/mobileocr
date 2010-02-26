@@ -1,7 +1,6 @@
 package washington.cs.mobileocr.main;
 
 import washington.cs.mobileocr.main.R;
-import washington.cs.mobileocr.weocr.WeOCRClient;
 import washington.cs.mobileocr.weocr.WeOCRServerList;
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -11,7 +10,6 @@ public class MobileOCRApplication extends Application {
 
     private static MobileOCRApplication sMe;
     
-    private WeOCRClient mWeOCRClient;
     private WeOCRServerList mWeOCRServerList;
     
     public MobileOCRApplication () {
@@ -26,9 +24,6 @@ public class MobileOCRApplication extends Application {
         return sMe;
     }
     
-    public static final WeOCRClient getOCRClient () {
-        return sMe.mWeOCRClient;
-    }
     
     public static final WeOCRServerList getOCRServerList () {
         return sMe.mWeOCRServerList;
@@ -56,9 +51,6 @@ public class MobileOCRApplication extends Application {
             endpointUrl = preferences.getString("",
                     getString(R.string.pref_weocr_server_default));
         } 
-        
-        // Initialize new Delicious HTTP client
-        mWeOCRClient = new WeOCRClient(endpointUrl);
         
     }
 }
