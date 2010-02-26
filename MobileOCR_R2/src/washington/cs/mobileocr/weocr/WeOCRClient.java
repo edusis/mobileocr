@@ -40,10 +40,7 @@ public final class WeOCRClient {
 
     private static final int HTTP_TIMEOUT = 6000; // in msec
 
-    private static final String USER_AGENT_STRING = "net.bitquill.ocr/0.1" +
-    " (Linux; U; Android " + android.os.Build.VERSION.RELEASE + ")" +
-    " Apache-HttpClient/UNAVAILABLE" +
-    " spapadim@cs.cmu.edu";
+    private static final String USER_AGENT_STRING = "Sparkplugs";
     
     private String mEndpoint;
     private DefaultHttpClient mHttpClient;
