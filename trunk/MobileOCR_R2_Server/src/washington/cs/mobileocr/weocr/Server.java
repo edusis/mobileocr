@@ -14,6 +14,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 public class Server {
+	
+	//TODO Set timeout limit
 
 	public static String doFileUpload(Bitmap b) {
 
@@ -21,7 +23,7 @@ public class Server {
 		HttpURLConnection conn = null;
 		DataOutputStream dos = null;
 		DataInputStream inStream = null;
-		String exsistingFileName = "doOCR.jpg";
+		String exsistingFileName = "doOCR.jpeg";
 
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
@@ -39,7 +41,7 @@ public class Server {
 			Log.e(TAG,"Inside second Method");
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
+			b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 			byte[] by = baos.toByteArray(); 
 			InputStream inputStream = new ByteArrayInputStream(by);
 
@@ -117,7 +119,7 @@ public class Server {
 			inStream = new DataInputStream ( conn.getInputStream() );
 			String str = "";
 			while (( str = inStream.readLine()) != null) {
-				responseFromServer += lineEnd + str;
+				responseFromServer += "\n" + str;
 				Log.e(TAG,"Server Response"+responseFromServer);
 			}
 			inStream.close();
@@ -125,7 +127,8 @@ public class Server {
 		catch (IOException ioex) {
 			Log.e(TAG, "error: " + ioex.getMessage(), ioex);
 		}
-		return responseFromServer;
+		
+		return responseFromServer.trim();
 	}
 
 }

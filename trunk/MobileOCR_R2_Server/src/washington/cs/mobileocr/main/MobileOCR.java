@@ -12,12 +12,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -52,9 +50,6 @@ public class MobileOCR extends Activity {
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
-		
-		/*Intent myIntent = new Intent(this, ScreenReader.class);
-		startActivity(myIntent);*/
 
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -133,13 +128,6 @@ public class MobileOCR extends Activity {
 		editor.putBoolean(INSTRUCTION_KEY, instructionFlag);
 	}
 
-	private void sendOCRRequest(final Bitmap textBitmap) {
-
-		Handler ocrHandler = mOCRThread.getHandler();
-		Message ocrMessage = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, textBitmap);
-		ocrHandler.sendMessage(ocrMessage);
-	}
-
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_FOCUS) {
 			if (event.getRepeatCount() == 0) {
@@ -166,9 +154,7 @@ public class MobileOCR extends Activity {
 	//restore preferences
 	private void restoreState() {
 		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
-		
 		Boolean toggleInstruction = settings.getBoolean(INSTRUCTION_KEY, true);
-		
 		instructionFlag = toggleInstruction;
 	}
 
@@ -179,26 +165,20 @@ public class MobileOCR extends Activity {
 			case R.id.msg_camera_auto_focus:
 				int status = msg.arg1;
 				cameraFacade.clearAutoFocus();
-
 				if (status == CameraFacade.AUTOFOCUS_SUCCESS) {
 					cameraFacade.requestPreviewFrame();
 				}
-
 				break;
 			case R.id.msg_camera_preview_frame:
 				Handler ocrHandler = mOCRThread.getHandler();
-
 				int width = cameraFacade.getWidth();
 				int height = cameraFacade.getHeight();
 				Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
 				ocrHandler.sendMessage(preprocessMsg);
 				break;
 			case R.id.msg_ui_ocr_success:
-
 				cameraFacade.onPause();
-
 				startScreenReaderView((String)msg.obj);
-
 				break;
 			case R.id.msg_ui_ocr_fail:
 				cameraFacade.startPreview();
