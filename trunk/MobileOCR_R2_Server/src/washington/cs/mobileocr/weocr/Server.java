@@ -23,7 +23,7 @@ public class Server {
 		HttpURLConnection conn = null;
 		DataOutputStream dos = null;
 		DataInputStream inStream = null;
-		String exsistingFileName = "doOCR.jpeg";
+		String exsistingFileName = "doOCR.png";
 
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
@@ -41,17 +41,14 @@ public class Server {
 			Log.e(TAG,"Inside second Method");
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			b.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
 			byte[] by = baos.toByteArray(); 
 			InputStream inputStream = new ByteArrayInputStream(by);
 
 			// open a URL connection to the Servlet
-
 			URL url = new URL(urlString);
 
-
 			// Open a HTTP connection to the URL
-
 			conn = (HttpURLConnection) url.openConnection();
 
 			// Allow Inputs
