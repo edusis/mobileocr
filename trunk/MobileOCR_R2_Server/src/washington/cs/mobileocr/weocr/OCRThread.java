@@ -1,6 +1,7 @@
 package washington.cs.mobileocr.weocr;
 
 import washington.cs.mobileocr.main.R;
+import washington.cs.mobileocr.tts.TTSHandler;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
@@ -20,6 +21,7 @@ public class OCRThread extends HandlerThread {
                 case R.id.msg_ocr_detect_word:
                 	break;
                 case R.id.msg_ocr_recognize:
+                	TTSHandler.ttsQueueSRMessage("Processing image, please wait");
                 	String ocrText = Server.doFileUpload((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
                 	Message msg2 = mUIHandler.obtainMessage(R.id.msg_ui_ocr_success, ocrText);
                     mUIHandler.sendMessage(msg2);

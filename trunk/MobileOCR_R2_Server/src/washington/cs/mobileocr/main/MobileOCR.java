@@ -127,6 +127,15 @@ public class MobileOCR extends Activity {
 		SharedPreferences.Editor editor = state.edit();
 		editor.putBoolean(INSTRUCTION_KEY, instructionFlag);
 	}
+	
+	protected void onStop() {
+		super.onStop();
+	}
+	
+	protected void onDestroy() {
+		TTSHandler.TTSDestroy();
+		super.onDestroy();
+	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_FOCUS) {

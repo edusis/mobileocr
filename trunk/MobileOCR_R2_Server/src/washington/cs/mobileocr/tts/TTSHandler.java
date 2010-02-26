@@ -60,6 +60,10 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 			ttsThread = new TTSHandler();
 		return ttsThread;
 	}
+	
+	public static void TTSDestroy() {
+		mTts.shutdown();
+	}
 
 	public void ttsSetContext(Context context) {
 		mTtsInitialized = false;
