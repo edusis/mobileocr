@@ -117,7 +117,7 @@ public class Server {
 			String str = "";
 			while (( str = inStream.readLine()) != null) {
 				responseFromServer += "\n" + str;
-				Log.e(TAG,"Server Response"+responseFromServer);
+				Log.e(TAG,"Server Response"+str);
 			}
 			inStream.close();
 		}
