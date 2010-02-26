@@ -63,23 +63,12 @@ public class WeOCRServerList {
             return position;
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            /*View view;
-            if (convertView == null) {
-                view = mInflater.inflate(R.layout.server_list_item, parent, false);
-            } else {
-                view = convertView;
-            }
+		@Override
+		public View getView(int arg0, View arg1, ViewGroup arg2) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 
-            Server srv = getItem(position);
-            TextView titleText = (TextView)view.findViewById(R.id.server_description_text);
-            titleText.setText(srv.title);
-            TextView tagsText = (TextView)view.findViewById(R.id.server_url_text);
-            tagsText.setText(srv.url);
-            return view;*/
-        	return null;
-        }
 
     }
     

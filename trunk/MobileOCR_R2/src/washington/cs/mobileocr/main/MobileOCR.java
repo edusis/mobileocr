@@ -124,7 +124,7 @@ public class MobileOCR extends Activity {
 		Log.d(TAG, "onPause");
 		super.onPause();
 		//unregisterReceiver(mConnectivityReceiver);
-		//stopOCRThread();
+		stopOCRThread();
 		
 		//store preferences
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);

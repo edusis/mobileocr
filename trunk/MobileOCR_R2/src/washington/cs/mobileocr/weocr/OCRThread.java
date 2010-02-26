@@ -9,6 +9,7 @@ import washington.cs.mobileocr.main.R;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.Bitmap.Config;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -30,41 +31,11 @@ public class OCRThread extends HandlerThread {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                case R.id.msg_ocr_detect_word:
-                	
-                	
-                	break;
+   
                 case R.id.msg_ocr_recognize:
-                	/*BitmapFactory.Options opt = new BitmapFactory.Options();
-                	opt.outWidth = msg.arg1;
-                	opt.outHeight = msg.arg2;
-                	opt.inPreferredConfig = Bitmap.Config.ALPHA_8;
-                	sendOCRRequest(BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length, opt));
-                	*/
-                	//Bitmap b = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, ((byte[])msg.obj).length);
-                	//Bitmap b = Bitmap.createBitmap(convByteArr2IntArr((byte[])msg.obj), msg.arg1, msg.arg2, Bitmap.Config.);
-                	/*if (b != null)
-                	{
-                		sendOCRRequest(b);
-                	}*/
-                	
-                	/*BitmapFactory.Options options = new BitmapFactory.Options();
-                	options.inSampleSize = 8;
-                	
-                	int test = ((byte[])msg.obj).length;
-                	Bitmap image = BitmapFactory.decodeByteArray((byte[])msg.obj, 0, 49152, options);
-                	
-                	int[] pixels = new int[49152]; //49152
-                	image.getPixels(pixels,0,192,0,0,192,256);
-                	Bitmap ocrImage = Bitmap.createBitmap(image,0,0,192, 256);
-                	//Bitmap ocrImage = Bitmap.createBitmap(pixels, msg.arg2, msg.arg1, Bitmap.Config.ARGB_8888);
-                	if (ocrImage != null)
-                	{
-                		sendOCRRequest(ocrImage);
-                	}*/
-                	sendOCRRequest((new GrayImage((byte[])msg.obj, msg.arg1, msg.arg2).asBitmap()));
-                    //sendOCRRequest(detectWord((byte[])msg.obj, msg.arg1, msg.arg2));
-                    break;
+              
+                	sendOCRRequest(asBitmap(msg.arg1, msg.arg2,(byte[])msg.obj));
+                	break;
                 case R.id.msg_ocr_quit:
                     getLooper().quit();
                     break;
@@ -73,16 +44,6 @@ public class OCRThread extends HandlerThread {
                 }
             }
         };
-    }
-    
-    private int[] convByteArr2IntArr(byte[] barr)
-    {
-    	int[] iarr = new int[barr.length];
-    	for (int i = 0 ; i <  iarr.length; i++)
-    	{
-    		iarr[i] = barr[i];
-    	}
-    	return iarr;
     }
     
     public OCRThread (Handler uiHandler) {
@@ -96,19 +57,6 @@ public class OCRThread extends HandlerThread {
     
     private void sendOCRRequest (Bitmap textBitmap) {
     	
-    /*	try {
-    		File photo=new File(Environment.getExternalStorageDirectory(),"testImage"+ count +".jpg"); 
-    		photo.mkdirs();
-    		photo.createNewFile();
-            FileOutputStream out = new FileOutputStream(photo.getPath());
-            textBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            out.flush();
-            out.close();
-            count++;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-    	
         WeOCRClient weOCRClient = MobileOCRApplication.getInstance().getOCRClient();
         try {
             String ocrText = weOCRClient.doOCR(textBitmap);
@@ -121,125 +69,49 @@ public class OCRThread extends HandlerThread {
         }
     }
     
-    /*private Bitmap detectWord (byte[] yuv, int imageWidth, int imageHeight) {
-        initImageBuffers(imageWidth, imageHeight);
-
-        GrayImage img = new GrayImage(yuv, imageWidth, imageHeight);
-        //long startTime = System.currentTimeMillis();
-        
-        Rect ext = makeTargetRect(imageWidth, imageHeight);
-      
-        findWordExtent(img, ext);
-        //Log.d(TAG, "Find word extent in " + (System.currentTimeMillis() - startTime) + " msec");
-        Log.d(TAG, "Extent is " + ext.top + "," + ext.left + "," + ext.bottom + "," + ext.right);
-
-        boolean extentWarningActive = 
-            ext.width() >= imageWidth * EXTENT_WARNING_WIDTH_FRACTION || ext.height() >= imageHeight * EXTENT_WARNING_HEIGHT_FRACTION;
-        Message warningMsg = mUIHandler.obtainMessage(R.id.msg_ui_extent_warning,
-                extentWarningActive ? 1 : 0, -1);
-        mUIHandler.sendMessage(warningMsg);
-        
-        if (mEnableDump) {
-            FileDumpUtil.dump("camera", img);
-            FileDumpUtil.dump("bin", mResultImg);
-        }
-
-        //startTime = System.currentTimeMillis();
-        Bitmap textBitmap = mResultImg.asBitmap(ext);
-        
-        
-        //Log.d(TAG, "Converted to Bitmap in " + (System.currentTimeMillis() - startTime) + " msec");
-        
-        if (mEnableDump) {
-            FileDumpUtil.dump("word", textBitmap);
-        }
-        
-        return textBitmap;
-        Message bitmapMsg = mUIHandler.obtainMessage(R.id.msg_ui_word_bitmap, textBitmap);
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(WORD_RECT, ext);
-        bitmapMsg.setData(bundle);
-        mUIHandler.sendMessage(bitmapMsg);
-    }*/
-
-   /* private static final float TARGET_HEIGHT_FRACTION = 0.033f;
-    private static final float TARGET_WIDTH_FRACTION = 0.021f;*/
-        
-
+    private static void decodeYUV(int[] out, byte[] fg, int width, int
+    		height) throws NullPointerException, IllegalArgumentException {
+    			final int sz = width * height;
+    			if(out == null) throw new NullPointerException("buffer 'out' is null");
+    			if(out.length < sz) throw new IllegalArgumentException("buffer 'out' size " + out.length + " < minimum " + sz);
+    			if(fg == null) throw new NullPointerException("buffer 'fg' is null");
+    			if(fg.length < sz) throw new IllegalArgumentException("buffer 'fg'	size " + fg.length + " < minimum " + sz * 3/ 2);
+    			int i, j;
+    			int Y, Cr = 0, Cb = 0;
+    			for(j = 0; j < height; j++) {
+    				int pixPtr = j * width;
+    				final int jDiv2 = j >> 1;
+    				for(i = 0; i < width; i++) {
+    					Y = fg[pixPtr]; if(Y < 0) Y += 255;
+    					if((i & 0x1) != 1) {
+    						final int cOff = sz + jDiv2 * width + (i >> 1) * 2;
+    						Cb = fg[cOff];
+    						if(Cb < 0) Cb += 127; else Cb -= 128;
+    						Cr = fg[cOff + 1];
+    						if(Cr < 0) Cr += 127; else Cr -= 128;
+    					}
+    					int R = Y + Cr + (Cr >> 2) + (Cr >> 3) + (Cr >> 5);
+    					if(R < 0) R = 0; else if(R > 255) R = 255;
+    					int G = Y - (Cb >> 2) + (Cb >> 4) + (Cb >> 5) - (Cr >> 1) + (Cr >>
+    		3) + (Cr >> 4) + (Cr >> 5);
+    					if(G < 0) G = 0; else if(G > 255) G = 255;
+    					int B = Y + Cb + (Cb >> 1) + (Cb >> 2) + (Cb >> 6);
+    					if(B < 0) B = 0; else if(B > 255) B = 255;
+    					out[pixPtr++] = 0xff000000 + (B << 16) + (G << 8) + R;
+    		}
+    	}
+    }
     
-   /* private void initImageBuffers (int width, int height) {
-        if (mResultImg == null) {
-            mBinImg = new GrayImage(width, height);
-            mTmpImg = new GrayImage(width, height);
-            mResultImg = new GrayImage(width, height);
-        }
-    }*/
-
-
-    /*private final void findWordExtent (GrayImage img, Rect ext) {
-        GrayImage resultImg = mResultImg;
-        GrayImage tmpImg = mTmpImg;
-        GrayImage binImg = mBinImg;
+    final public Bitmap asBitmap ( int width, int height, byte[] rawData) {
+       
+        int imgWidth = width;
+        int imgHeight = height;
+        int[] buf = new int[imgWidth * imgHeight];
         
-        // Contrast stretch
-        int imgMin = img.min(), imgMax = img.max();
-        Log.d(TAG, "Image min = " + imgMin + ", max = " + imgMax);
-        img.contrastStretch((byte)imgMin, (byte)imgMax, resultImg); // Temporarily store stretched image here
-
-        // XXX - Refactor code, this shouldn't be here?
-        boolean contrastWarningActive = 
-            (imgMax - imgMin) <= CONTRAST_WARNING_RANGE;
-        Log.d(TAG, "Contrast range = " + (imgMax - imgMin));
-        Message warningMsg = mUIHandler.obtainMessage(R.id.msg_ui_contrast_warning, 
-                contrastWarningActive ? 1 : 0, -1);
-        mUIHandler.sendMessage(warningMsg);
+        decodeYUV(buf, rawData, imgWidth, imgHeight);
         
-        // Adaptive threshold
-        float imgMean = resultImg.mean();
-        Log.d(TAG, "Stretched image mean = " + imgMean);
-        byte hi, lo;
-        if (imgMean > 127) { // XXX Arbitrary threshold
-            // Most likely dark text on light background
-            hi = (byte)255; 
-            lo = (byte)0;
-        } else {
-            // Most likely light text on dark background
-            hi = (byte)0;
-            lo = (byte)255;
-        }
-        resultImg.meanFilter(10, tmpImg);  // Temporarily store local means here
-        int threshOffset = (int)(0.33 * Math.sqrt(resultImg.variance()));  // 0.33 pulled out of my butt
-        resultImg.adaptiveThreshold(hi, lo, threshOffset, tmpImg, resultImg);
-
-        // Dilate; it's grayscale, so we should use erosion instead
-        resultImg.erode(sHStrel[mDilateRadius], tmpImg);
-        tmpImg.erode(sVStrel[mDilateRadius], binImg);
-
-        // Find word extents
-        int left = ext.left, right = ext.right, top = ext.top, bottom = ext.bottom;
-        int imgWidth = img.getWidth(), imgHeight = img.getHeight();
-        boolean extended;
-        do {
-            extended = false;
-            
-            if ((top - 1 >= 0) && binImg.min(left, top - 1, right, top) == 0) {
-                --top;
-                extended = true;
-            }
-            if ((bottom + 1 < imgHeight) && binImg.min(left, bottom, right, bottom + 1) == 0) {
-                ++bottom;
-                extended = true;
-            }
-            if ((left - 1 >= 0) && binImg.min(left - 1, top, left, bottom) == 0) {
-                --left;
-                extended = true;
-            }
-            if ((right + 1 < imgWidth) && binImg.min(right, top, right + 1, bottom) == 0) {
-                ++right;
-                extended = true;
-            }
-        } while (extended);
-        ext.set(Math.max(0, left - 2), Math.max(0, top - 2), 
-                Math.min(imgWidth - 1, right + 2), Math.min(imgHeight - 1, bottom + 2));
-    }*/
+        Bitmap b = Bitmap.createBitmap(buf, width, height, Config.ARGB_8888);
+        return b;        
+    }
+    
 }
