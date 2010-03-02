@@ -153,7 +153,7 @@ public class WeOCRServerList {
         parser.close();
     }
     
-    protected ArrayList<Server> getServerList () {
+    public ArrayList<Server> getServerList () {
         return mServerList;
     }
     
