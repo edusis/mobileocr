@@ -150,10 +150,7 @@ public class GrayImage extends GrayMatrix {
         }
         int imgWidth = mWidth;
         int imgHeight = mHeight;
-        //GrayToARGB(mData, imgWidth, imgHeight, buf, left, top, width, height);
         decodeYUV(buf, mData, imgWidth, imgHeight);
-        
-        //Bitmap b = Bitmap.createBitmap(convByteArr2IntArr(mData), width, height, Config.ARGB_8888);
         Bitmap b = Bitmap.createBitmap(buf, width, height, Config.ARGB_8888);
         return b;        
     }
