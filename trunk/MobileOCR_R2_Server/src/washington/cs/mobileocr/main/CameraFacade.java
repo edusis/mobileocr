@@ -3,6 +3,7 @@ package washington.cs.mobileocr.main;
 import java.io.IOException;
 
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
@@ -18,6 +19,7 @@ import android.view.SurfaceHolder;
 public class CameraFacade implements SurfaceHolder.Callback {
 	
 	public static final String CAMERA_TAG = "CameraFacade";
+	public static Bitmap image;
 
 	private boolean mAutoFocusInProgress;
     private boolean mPreviewCaptureInProgress;
@@ -93,8 +95,6 @@ public class CameraFacade implements SurfaceHolder.Callback {
         mx = width;
         my = height;
         setCameraParameters();
-        
-
     }
         
     public void startPreview()
@@ -128,11 +128,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
         
     private void setCameraParameters() {
         Camera.Parameters parameters = mCamera.getParameters();
-        //parameters.setPreviewSize(mx, my);
         parameters.setPictureSize(mx, my);
-        
-        //parameters.remove("whitebalance"); // theoretically, this might do something helpful
-        
         parameters.setPictureFormat(PixelFormat.JPEG);
        
         mCamera.setParameters(parameters);
@@ -140,7 +136,6 @@ public class CameraFacade implements SurfaceHolder.Callback {
         	mCamera.startPreview();
         
         mPreviewRunning = true;
-        
         initCameraStateVariables();
     }
 
@@ -200,8 +195,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
         //mCamera.takePicture(shutterCallback, null, jpegCallback);
         mPreviewCaptureInProgress = true;
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
-          
             public void onPreviewFrame(byte[] data, Camera camera) {
+            	BitmapFactory.Options options = new BitmapFactory.Options();
+            	image = BitmapFactory.decodeByteArray(data, 0, data.length, options);
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
                 mUIHandler.sendMessage(msg);
             }

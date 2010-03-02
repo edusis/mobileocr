@@ -23,7 +23,7 @@ public class Server {
 		HttpURLConnection conn = null;
 		DataOutputStream dos = null;
 		DataInputStream inStream = null;
-		String exsistingFileName = "doOCR.png";
+		String fileName = "doOCR.png";
 
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
@@ -36,53 +36,49 @@ public class Server {
 		String urlString = "http://128.208.4.56/tesseract/upload.php";
 		
 		try {
-			//------------------ CLIENT REQUEST
-
+			//Client Request
 			Log.e(TAG,"Inside second Method");
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
-			byte[] by = baos.toByteArray(); 
-			InputStream inputStream = new ByteArrayInputStream(by);
+			byte[] bmpBytes = baos.toByteArray(); 
+			InputStream inputStream = new ByteArrayInputStream(bmpBytes);
 
-			// open a URL connection to the Servlet
+			//Open a URL connection to the Servlet
 			URL url = new URL(urlString);
 
-			// Open a HTTP connection to the URL
+			//Open a HTTP connection to the URL
 			conn = (HttpURLConnection) url.openConnection();
 
-			// Allow Inputs
+			//Allow Inputs
 			conn.setDoInput(true);
 
-			// Allow Outputs
+			//Allow Outputs
 			conn.setDoOutput(true);
 
-			// Don't use a cached copy.
+			//Don't use a cached copy.
 			conn.setUseCaches(false);
 
-			// Use a post method.
+			//Use a post method.
 			conn.setRequestMethod("POST");
 
 			conn.setRequestProperty("Connection", "Keep-Alive");
-
+			
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
 
-			dos = new DataOutputStream( conn.getOutputStream() );
-
+			dos = new DataOutputStream( conn.getOutputStream());
 			dos.writeBytes(twoHyphens + boundary + lineEnd);
-			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + exsistingFileName +"\"" + lineEnd);
+			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + fileName +"\"" + lineEnd);
 			dos.writeBytes(lineEnd);
 
 			Log.e(TAG,"Headers are written");
 
-			// create a buffer of maximum size
-
+			//Create a buffer of maximum size
 			bytesAvailable = inputStream.available();
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
 			buffer = new byte[bufferSize];
 
-			// read file and write it into form...
-
+			//Read file and write it into form...
 			bytesRead = inputStream.read(buffer, 0, bufferSize);
 
 			while (bytesRead > 0) {
@@ -92,12 +88,11 @@ public class Server {
 				bytesRead = inputStream.read(buffer, 0, bufferSize);
 			}
 
-			// send multipart form data necesssary after file data...
-
+			//Send multipart form data necesssary after file data...
 			dos.writeBytes(lineEnd);
 			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
-			// close streams
+			//Close streams
 			Log.e(TAG,"File is written");
 			inputStream.close();
 			dos.flush();
@@ -111,11 +106,11 @@ public class Server {
 			Log.e(TAG, "error: " + ioe.getMessage(), ioe);
 		}
 
-		//Read the SERVER RESPONSE
+		//Read the server response
 		try {
-			inStream = new DataInputStream ( conn.getInputStream() );
+			inStream = new DataInputStream ( conn.getInputStream());
 			String str = "";
-			while (( str = inStream.readLine()) != null) {
+			while ((str = inStream.readLine()) != null) {
 				responseFromServer += "\n" + str;
 				Log.e(TAG,"Server Response"+str);
 			}
