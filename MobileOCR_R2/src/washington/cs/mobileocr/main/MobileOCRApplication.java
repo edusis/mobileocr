@@ -1,5 +1,7 @@
 package washington.cs.mobileocr.main;
 
+import java.util.ArrayList;
+
 import washington.cs.mobileocr.main.R;
 import washington.cs.mobileocr.weocr.WeOCRClient;
 import washington.cs.mobileocr.weocr.WeOCRServerList;
@@ -13,6 +15,7 @@ public class MobileOCRApplication extends Application {
     
     private WeOCRClient mWeOCRClient;
     private WeOCRServerList mWeOCRServerList;
+    private int mServerIndex = 0;
     
     public MobileOCRApplication () {
         sMe = this;
@@ -34,6 +37,8 @@ public class MobileOCRApplication extends Application {
         return sMe.mWeOCRServerList;
     }
     
+    
+    
     @Override
     public void onCreate() {
         super.onCreate();
@@ -47,8 +52,15 @@ public class MobileOCRApplication extends Application {
             // TODO
         }
     }
-
+    
+    public void changeServer() {
+    	ArrayList<WeOCRServerList.Server> serversList = mWeOCRServerList.getServerList();
+    	mServerIndex = (mServerIndex + 1) % serversList.size(); 
+    	rebindServer(serversList.get(mServerIndex).url);
+    }
+    
     public void rebindServer (String endpointUrl) {
+    	//TODO: shared preference is not used for saving url yet
         SharedPreferences preferences = 
             PreferenceManager.getDefaultSharedPreferences(this);
         if (endpointUrl == null) {

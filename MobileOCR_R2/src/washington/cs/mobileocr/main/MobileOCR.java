@@ -59,7 +59,7 @@ public class MobileOCR extends Activity {
 
 		SurfaceView view = new SurfaceView(this);
 
-		cameraFacade = new CameraFacade(view.getHolder(), mHandler);
+		cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
 
 		setContentView(view);
 		
@@ -124,7 +124,7 @@ public class MobileOCR extends Activity {
 		Log.d(TAG, "onPause");
 		super.onPause();
 		//unregisterReceiver(mConnectivityReceiver);
-		stopOCRThread();
+		//stopOCRThread();
 		
 		//store preferences
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);
@@ -200,9 +200,17 @@ public class MobileOCR extends Activity {
 
 				break;
 			case R.id.msg_ui_ocr_fail:
+				//if network is good, change server
+				if (mConnectivityManager.getNetworkInfo(0).isConnected()||
+					mConnectivityManager.getNetworkInfo(1).isConnected())
+				{
+					MobileOCRApplication.getInstance().changeServer();
+				}
 				cameraFacade.startPreview();
 				break;
 			}
 		}
 	};
+	
+	
 }
