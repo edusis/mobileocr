@@ -37,7 +37,7 @@ public class Server {
 		
 		try {
 			//Client Request
-			Log.e(TAG,"Inside second Method");
+			Log.e(TAG,"Beginning client request");
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -93,7 +93,7 @@ public class Server {
 			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
 			//Close streams
-			Log.e(TAG,"File is written");
+			Log.e(TAG,"File is written on server");
 			inputStream.close();
 			dos.flush();
 			dos.close();
@@ -119,7 +119,7 @@ public class Server {
 			Log.e(TAG, "error: " + ioex.getMessage(), ioex);
 		}
 		
-		Log.e(TAG,"Server Response: "+responseFromServer.trim());
+		Log.e(TAG,"Server Response: " + responseFromServer.trim());
 		return responseFromServer.trim();
 	}
 

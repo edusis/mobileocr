@@ -55,7 +55,7 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 	}
 
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		Log.d("MOCR","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+		Log.d("ScreenReader","Click, loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
 		TTSHandler.getInstance().setParam(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "Speaking");
 		autoplay = false;
 		if (TTSHandler.getDoneSpeaking()) {
@@ -205,7 +205,11 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 	}
 
 	private static void startPlaying(String passedStr) {
-		TTSHandler.ttsQueueSRMessage(passedStr);
+		Log.e("ScreenReader","Speak @ loc = " + "("+loc[0]+","+loc[1]+","+loc[2]+")");
+		if (passedStr.equals("") || passedStr.equals("[ ]+"))
+			TTSHandler.ttsQueueSRMessage("blank");
+		else
+			TTSHandler.ttsQueueSRMessage(passedStr);
 	}
 
 	private void stopPlaying() {
