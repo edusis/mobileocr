@@ -20,7 +20,7 @@ import android.widget.TextView;
 public class ScreenReader extends Activity {
 
 	private GestureDetector gestureScanner;
-	private static final String TAG = TTSHandler.class.getSimpleName();
+	private static final String TAG = "ScreenReader";
 	private String passedString = null;
 	private static String[] sentenceArray;
 	private String[] wordArray;
@@ -41,9 +41,14 @@ public class ScreenReader extends Activity {
 		Bundle extras = this.getIntent().getExtras();
 		if (passedString == null || !passedString.equals(extras.getString("resultString"))) {
 			passedString = extras != null ? extras.getString("resultString"): "Error: The string is not correct";
+			//passedString = passedString.replaceAll("\\s+", "");
+			//passedString = passedString.replaceAll("[.?!]+\\n", "\\n");
+			String cleanedPassedString = passedString.replaceAll("\\n+|\\t+|\\s+", "");
+			if (cleanedPassedString.equals("[ ]+") || cleanedPassedString.equals(""))
+				passedString = "There are no OCR results";
 			sentenceArray = TextParser.sentenceParse(passedString);
+			wordArray = TextParser.wordParse(sentenceArray);
 			wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
-			wordArray = TextParser.wordParse(passedString);
 		}
 			
 		TextView text = (TextView) findViewById(R.id.text);
