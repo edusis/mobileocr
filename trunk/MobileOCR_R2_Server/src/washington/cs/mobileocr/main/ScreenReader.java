@@ -21,6 +21,10 @@ public class ScreenReader extends Activity {
 
 	private GestureDetector gestureScanner;
 	private static final String TAG = TTSHandler.class.getSimpleName();
+	private String passedString = null;
+	private static String[] sentenceArray;
+	private String[] wordArray;
+	private static int[] wordsInSentences;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,13 +39,17 @@ public class ScreenReader extends Activity {
 		setContentView(R.layout.screenreader);
 		
 		Bundle extras = this.getIntent().getExtras();
-		String passedString = null;
-		passedString = extras != null ? extras.getString("resultString"): "Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?";
-		
+		if (passedString == null || !passedString.equals(extras.getString("resultString"))) {
+			passedString = extras != null ? extras.getString("resultString"): "Error: The string is not correct";
+			sentenceArray = TextParser.sentenceParse(passedString);
+			wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
+			wordArray = TextParser.wordParse(passedString);
+		}
+			
 		TextView text = (TextView) findViewById(R.id.text);
         text.setText(passedString);
         
-		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(passedString);
+		ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(sentenceArray, wordsInSentences, wordArray);
 		
 		gestureScanner = new GestureDetector(gHandler);
 	}

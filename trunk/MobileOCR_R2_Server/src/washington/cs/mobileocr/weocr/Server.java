@@ -112,7 +112,6 @@ public class Server {
 			String str = "";
 			while ((str = inStream.readLine()) != null) {
 				responseFromServer += "\n" + str;
-				Log.e(TAG,"Server Response"+str);
 			}
 			inStream.close();
 		}
@@ -120,6 +119,7 @@ public class Server {
 			Log.e(TAG, "error: " + ioex.getMessage(), ioex);
 		}
 		
+		Log.e(TAG,"Server Response: "+responseFromServer.trim());
 		return responseFromServer.trim();
 	}
 
