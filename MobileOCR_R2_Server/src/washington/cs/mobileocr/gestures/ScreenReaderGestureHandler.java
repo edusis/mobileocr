@@ -4,7 +4,6 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 import washington.cs.mobileocr.main.R;
-import washington.cs.mobileocr.main.TextParser;
 import washington.cs.mobileocr.tts.TTSHandler;
 
 /*
@@ -32,9 +31,16 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
-	public ScreenReaderGestureHandler(String passedString) {
+	public ScreenReaderGestureHandler(String[] sentenceArray, int[] wordsInSentences, String[] wordArray) {
 		super();
-		initialize(passedString);
+		//TODO: Save preferences so that we don't initialize every time
+		ScreenReaderGestureHandler.sentenceArray = sentenceArray;
+		ScreenReaderGestureHandler.wordsInSentences = wordsInSentences;
+		this.wordArray = wordArray;
+		loc[0] = loc[1] = loc[2] = 0;
+		mode = SENTENCE_MODE;
+		saySpace = 0;
+		autoplay = false;
 	}
 
 	protected int nextState(int event) {
@@ -107,16 +113,6 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 		autoplay = true;
 		startPlaying(sentenceArray[loc[0]]);
 		return false;
-	}
-
-	private void initialize(String passedString) {
-		sentenceArray = TextParser.sentenceParse(passedString);
-		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
-		wordArray = TextParser.wordParse(passedString);
-		loc[0] = loc[1] = loc[2] = 0;
-		mode = SENTENCE_MODE;
-		saySpace = 0;
-		autoplay = false;
 	}
 
 	private void playOnGesture(boolean leftSwipe) {
@@ -223,7 +219,6 @@ public class ScreenReaderGestureHandler extends GestureHandler {
 			startPlaying(sentenceArray[loc[0]]);
 		}
 	}
-
 
 	private String speakChar(char passedChar) {
 		String str = "";

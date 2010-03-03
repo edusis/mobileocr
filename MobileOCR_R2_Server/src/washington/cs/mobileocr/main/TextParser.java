@@ -7,24 +7,21 @@ package washington.cs.mobileocr.main;
 
 public class TextParser {
 	
-	/* 
-	 * Parses a block of text into sentences by the punctuation
-	 */
+	//Parses a block of text into sentences by the punctuation
 	public static String[] sentenceParse(String passedString) {
 		String delims = "[.?!,]+";
 		String[] tokens = passedString.trim().split(delims);
 		return tokens;
 	}
 	
-	/*
-	 * Parses a block of text into words by the spaces
-	 */
+	//Parses a block of text into words by the spaces
 	public static String[] wordParse(String passedString) {
 		String delims = "[ ]+";
 		String[] tokens = passedString.trim().split(delims);
 		return tokens;
 	}
 	
+	//Counts the number of words in each of the sentences
 	public static int[] countWordsInSentence(String[] passedSentences) {
 		String delims = "[ ]+";
 		int count = 0;
