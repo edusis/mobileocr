@@ -1,16 +1,28 @@
+/**
+ * @author Hussein Yapit
+ * 
+ * based on Will Johnson's camera facade
+ */
+
 package washington.cs.mobileocr.main;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
+import android.graphics.Bitmap.CompressFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
+import android.media.MediaPlayer;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -19,7 +31,6 @@ import android.view.SurfaceHolder;
 public class CameraFacade implements SurfaceHolder.Callback {
 	
 	public static final String CAMERA_TAG = "CameraFacade";
-	public static Bitmap image;
 
 	private boolean mAutoFocusInProgress;
     private boolean mPreviewCaptureInProgress;
@@ -31,6 +42,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
     
     private Handler mUIHandler = null;
     
+    
     private SurfaceHolder mHolder; // we get this from the SurfaceView, and hardly ever use it
     private Camera mCamera; // here it is!
     private int mx;
@@ -39,8 +51,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
     private boolean surfaceExists;
     // this next parameter is true between a call of mCamera.startPreview() and mCamera.stopPreview
     private boolean mPreviewRunning;
+    private MediaPlayer mp;
 
-    public CameraFacade(SurfaceHolder holder, Handler UIHandler) {    
+    public CameraFacade(Context context, SurfaceHolder holder, Handler UIHandler) {    
     	mHolder = holder;
     
     	mHolder.addCallback(this);
@@ -50,6 +63,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
         surfaceExists = mPreviewRunning = false;
         
         mUIHandler = UIHandler;
+        
+        mp = MediaPlayer.create(context, R.raw.camera1);
+       
     }
 
     // this gets called onResume.  Originally, it was called only if the
@@ -95,6 +111,8 @@ public class CameraFacade implements SurfaceHolder.Callback {
         mx = width;
         my = height;
         setCameraParameters();
+        
+
     }
         
     public void startPreview()
@@ -128,7 +146,9 @@ public class CameraFacade implements SurfaceHolder.Callback {
         
     private void setCameraParameters() {
         Camera.Parameters parameters = mCamera.getParameters();
+        parameters.setPreviewSize(mx, my);
         parameters.setPictureSize(mx, my);
+        
         parameters.setPictureFormat(PixelFormat.JPEG);
        
         mCamera.setParameters(parameters);
@@ -136,6 +156,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
         	mCamera.startPreview();
         
         mPreviewRunning = true;
+        
         initCameraStateVariables();
     }
 
@@ -191,15 +212,20 @@ public class CameraFacade implements SurfaceHolder.Callback {
         }
         
         mPreviewCaptureInProgress = true;
-        
-        //mCamera.takePicture(shutterCallback, null, jpegCallback);
-        mPreviewCaptureInProgress = true;
+        //mCamera.takePicture(null, null, jpegCallback);
+        //mPreviewCaptureInProgress = true;
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
+          
             public void onPreviewFrame(byte[] data, Camera camera) {
-            	BitmapFactory.Options options = new BitmapFactory.Options();
-            	image = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            	mp.start();
+            	
                 Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
+                
                 mUIHandler.sendMessage(msg);
+                
+                mCamera.stopPreview();
+                mCamera.release();
+                mCamera = null;
             }
         });
     }
@@ -230,30 +256,5 @@ public class CameraFacade implements SurfaceHolder.Callback {
         mPreviewCaptureInProgress = false;
     }
     
-    private ShutterCallback shutterCallback = new ShutterCallback() {
-
-		public void onShutter() {
-			setCameraParameters();
-
-		}
-    	
-    };
-    
-    private PictureCallback jpegCallback = new PictureCallback() {
-
-		public void onPictureTaken(byte[] data, Camera camera) {
-			if (data != null)
-			{
-				Message picDataMsg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
-				mUIHandler.sendMessage(picDataMsg);
-			}
-			else
-			{
-				mCamera.startPreview();
-			}
-			
-			mPreviewCaptureInProgress = false;
-		}
-    	
-    };
+  
 }

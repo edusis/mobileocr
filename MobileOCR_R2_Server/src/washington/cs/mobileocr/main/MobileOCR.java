@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,12 +51,12 @@ public class MobileOCR extends Activity {
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
-
+	
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		SurfaceView view = new SurfaceView(this);
 
-		cameraFacade = new CameraFacade(view.getHolder(), mHandler);
+		cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
 
 		setContentView(view);
 		
@@ -127,14 +128,12 @@ public class MobileOCR extends Activity {
 		SharedPreferences.Editor editor = state.edit();
 		editor.putBoolean(INSTRUCTION_KEY, instructionFlag);
 	}
-	
-	protected void onStop() {
-		super.onStop();
-	}
-	
-	protected void onDestroy() {
-		TTSHandler.TTSDestroy();
-		super.onDestroy();
+
+	private void sendOCRRequest(final Bitmap textBitmap) {
+
+		Handler ocrHandler = mOCRThread.getHandler();
+		Message ocrMessage = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, textBitmap);
+		ocrHandler.sendMessage(ocrMessage);
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -163,7 +162,9 @@ public class MobileOCR extends Activity {
 	//restore preferences
 	private void restoreState() {
 		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
+		
 		Boolean toggleInstruction = settings.getBoolean(INSTRUCTION_KEY, true);
+		
 		instructionFlag = toggleInstruction;
 	}
 
@@ -174,25 +175,39 @@ public class MobileOCR extends Activity {
 			case R.id.msg_camera_auto_focus:
 				int status = msg.arg1;
 				cameraFacade.clearAutoFocus();
+
 				if (status == CameraFacade.AUTOFOCUS_SUCCESS) {
 					cameraFacade.requestPreviewFrame();
 				}
+
 				break;
 			case R.id.msg_camera_preview_frame:
 				Handler ocrHandler = mOCRThread.getHandler();
+
 				int width = cameraFacade.getWidth();
 				int height = cameraFacade.getHeight();
 				Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
 				ocrHandler.sendMessage(preprocessMsg);
 				break;
 			case R.id.msg_ui_ocr_success:
+
 				cameraFacade.onPause();
+
 				startScreenReaderView((String)msg.obj);
+
 				break;
 			case R.id.msg_ui_ocr_fail:
+				//if network is good, change server
+				if (mConnectivityManager.getNetworkInfo(0).isConnected()||
+					mConnectivityManager.getNetworkInfo(1).isConnected())
+				{
+					//MobileOCRApplication.getInstance().changeServer();
+				}
 				cameraFacade.startPreview();
 				break;
 			}
 		}
 	};
+	
+	
 }
