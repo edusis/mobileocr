@@ -9,15 +9,20 @@ import washington.cs.mobileocr.gestures.NavigationGestureHandler;
 import washington.cs.mobileocr.tts.TTSHandler;
 import washington.cs.mobileocr.weocr.OCRThread;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -29,6 +34,9 @@ import android.view.WindowManager;
 public class MobileOCR extends Activity {
 
 	private static final String INSTRUCTION_KEY = "INSTRUCTION_KEY";
+	
+	private static final int NO_CONNECTION_VIBRATE_TIME = 4000;
+	private static final int IS_CONNECTED_VIBRATE_INTERVAL = 500;
 	
 	public static boolean instructionFlag = true;
 	
@@ -42,6 +50,10 @@ public class MobileOCR extends Activity {
 	private OCRThread mOCRThread;
 
 	private int MY_DATA_CHECK_CODE;
+	
+	private Vibrator mVibrator = null;
+	
+	private boolean mIsNotified = true;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -52,6 +64,8 @@ public class MobileOCR extends Activity {
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 	
+		mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		SurfaceView view = new SurfaceView(this);
@@ -70,6 +84,8 @@ public class MobileOCR extends Activity {
 		Intent checkIntent = new Intent();
 		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+		
+		networkNotify();
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -92,6 +108,48 @@ public class MobileOCR extends Activity {
 		return gestureScanner.onTouchEvent(event);
 	}
 
+	private final BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver () {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(TAG, "Connectivity action broadcast");
+			networkNotify();
+		}
+	};
+	
+	private void networkNotify() {
+		 NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+	     if (netInfo == null) {
+	        mVibrator.vibrate(3000);
+	     } else {
+	         int netType = netInfo.getType();
+	         int netSubtype = netInfo.getSubtype();
+	         
+	         if (!mIsNotified) {
+		         switch (netType) {
+		         case ConnectivityManager.TYPE_WIFI:
+		        	 mVibrator.vibrate(this.NO_CONNECTION_VIBRATE_TIME);
+		             break;
+		         case ConnectivityManager.TYPE_MOBILE:
+		             if (netSubtype == TelephonyManager.NETWORK_TYPE_UMTS) {
+		                 long[] pattern = {500, 500, 500};
+		                 mVibrator.vibrate(pattern, 0);
+		                 
+		             } else {
+		                 long[] pattern = {500, 500, 500, 500, 500};
+		                 mVibrator.vibrate(pattern, 0);
+		             }
+		             break;
+		        
+		         default:
+		        	 
+		             break;
+		         }
+		         
+		         this.mIsNotified = true;
+	         }
+	     }
+	}
+	    
 	private void startOCRThread () {
 		assert(mOCRThread == null);
 		mOCRThread = new OCRThread(mHandler);
@@ -114,15 +172,19 @@ public class MobileOCR extends Activity {
 		Log.d(TAG, "onResume");
 		super.onResume();
 		startOCRThread();
+		
+		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mConnectivityReceiver, filter, null, mHandler);
+        
 		cameraFacade.onResume();
 	}
 
 	protected void onPause() {
 		Log.d(TAG, "onPause");
 		super.onPause();
-		//unregisterReceiver(mConnectivityReceiver);
+		unregisterReceiver(mConnectivityReceiver);
 		//stopOCRThread();
-		
+		this.mIsNotified = false;
 		//store preferences
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = state.edit();
