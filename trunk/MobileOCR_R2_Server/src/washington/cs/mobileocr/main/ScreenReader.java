@@ -83,6 +83,7 @@ public class ScreenReader extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
 	}
 
 }

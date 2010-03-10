@@ -20,7 +20,7 @@ import android.util.Log;
 public class TTSHandler implements OnUtteranceCompletedListener{
 
 	private static boolean mTtsInitialized;
-	private static TextToSpeech mTts;
+	private  TextToSpeech mTts;
 	private static TTSHandler ttsThread;
 	private final static String TAG = "TTS";
 	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
@@ -61,7 +61,7 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		return ttsThread;
 	}
 	
-	public static void TTSDestroy() {
+	public void TTSDestroy() {
 		mTts.shutdown();
 	}
 
@@ -100,7 +100,7 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		}
 	}
 
-	private final static TextToSpeech.OnInitListener ttsInitListener = new TextToSpeech.OnInitListener() {
+	private final TextToSpeech.OnInitListener ttsInitListener = new TextToSpeech.OnInitListener() {
 		public void onInit(int status) {
 			Log.d(TAG, "TTS init");
 			mTtsInitialized = true;
