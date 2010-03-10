@@ -35,8 +35,7 @@ public class MobileOCR extends Activity {
 
 	private static final String INSTRUCTION_KEY = "INSTRUCTION_KEY";
 	
-	private static final int NO_CONNECTION_VIBRATE_TIME = 4000;
-	private static final int IS_CONNECTED_VIBRATE_INTERVAL = 500;
+	private static final int IS_CONNECTED_VIBRATE_INTERVAL = 300;
 	
 	public static boolean instructionFlag = true;
 	
@@ -85,7 +84,7 @@ public class MobileOCR extends Activity {
 		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 		
-		networkNotify();
+		initNetworkNotify();
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -103,6 +102,7 @@ public class MobileOCR extends Activity {
 		}
 	}
 
+
 	public boolean onTouchEvent(MotionEvent event)
 	{
 		return gestureScanner.onTouchEvent(event);
@@ -116,10 +116,35 @@ public class MobileOCR extends Activity {
 		}
 	};
 	
+	/**
+	 * initial network checking. Similar to networkNotify() except this function
+	 * is not hooked to networkreceiver
+	 */
+	private void initNetworkNotify() {
+		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
+		if (netInfo == null) {
+           	 long[] pattern = {200, 200, 200};
+                mVibrator.vibrate(pattern, 0);
+	     }
+		else {
+			mVibrator.vibrate(200);
+		}
+	}
+			
+	
+	
+	//provide network availability feedback to user using vibration. It notifies user
+	//if network has been lost while MobileOCR is running
 	private void networkNotify() {
 		 NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
 	     if (netInfo == null) {
-	        mVibrator.vibrate(3000);
+	    	 
+             if (mIsNotified) {
+            	 long[] pattern = {200, 200, 200};
+                 mVibrator.vibrate(pattern, 0);
+            	 mIsNotified = false;
+             }
+             
 	     } else {
 	         int netType = netInfo.getType();
 	         int netSubtype = netInfo.getSubtype();
@@ -127,19 +152,11 @@ public class MobileOCR extends Activity {
 	         if (!mIsNotified) {
 		         switch (netType) {
 		         case ConnectivityManager.TYPE_WIFI:
-		        	 mVibrator.vibrate(this.NO_CONNECTION_VIBRATE_TIME);
+		        	 mVibrator.vibrate(200);
 		             break;
 		         case ConnectivityManager.TYPE_MOBILE:
-		             if (netSubtype == TelephonyManager.NETWORK_TYPE_UMTS) {
-		                 long[] pattern = {500, 500, 500};
-		                 mVibrator.vibrate(pattern, 0);
-		                 
-		             } else {
-		                 long[] pattern = {500, 500, 500, 500, 500};
-		                 mVibrator.vibrate(pattern, 0);
-		             }
+		        	 mVibrator.vibrate(200 );
 		             break;
-		        
 		         default:
 		        	 
 		             break;
@@ -189,6 +206,12 @@ public class MobileOCR extends Activity {
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = state.edit();
 		editor.putBoolean(INSTRUCTION_KEY, instructionFlag);
+	}
+	
+	public void onDestroy() {
+		super.onDestroy();
+		
+		TTSHandler.getInstance().TTSDestroy();
 	}
 
 	private void sendOCRRequest(final Bitmap textBitmap) {
