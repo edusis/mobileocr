@@ -9,7 +9,11 @@ package washington.cs.mobileocr.weocr;
  * modification, are permitted provided you follow the BSD license.
  * 
  * 
- * This class handles the linking of all the OCR parts.
+ * This class connects several parts of the OCR process together.
+ * After a picture is taken, this class will convert that preview frame
+ * into a bitmap. The bitmap is then sent to a server where OCR is done
+ * and the text is received. After the text is received, this class will
+ * tell the application that there is text to display in the screen reader.
  */
 
 import washington.cs.mobileocr.main.R;
@@ -27,18 +31,17 @@ public class OCRThread extends HandlerThread {
 	private Handler mUIHandler;
 	private Handler mHandler;
 
+	//Handles an OCR request when the camera has taken a picture
 	protected void onLooperPrepared () {
 		mHandler = new Handler(getLooper()) {
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
-				case R.id.msg_ocr_detect_word:
-					break;
 				case R.id.msg_ocr_recognize:
 					TTSHandler.ttsQueueSRMessage("Processing image, please wait");
-					Bitmap old = asBitmap(msg.arg1, msg.arg2,(byte[])msg.obj);
-					String ocrText = Server.doFileUpload(old);
-					Message msg2 = mUIHandler.obtainMessage(R.id.msg_ui_ocr_success, ocrText);
-					mUIHandler.sendMessage(msg2);
+					Bitmap bmp = asBitmap(msg.arg1, msg.arg2,(byte[])msg.obj);
+					String ocrText = Server.doFileUpload(bmp);
+					Message success = mUIHandler.obtainMessage(R.id.msg_ui_ocr_success, ocrText);
+					mUIHandler.sendMessage(success);
 					break;
 				case R.id.msg_ocr_quit:
 					getLooper().quit();
@@ -50,6 +53,7 @@ public class OCRThread extends HandlerThread {
 		};
 	}
 
+	//Creates an instance of OCRThread
 	public OCRThread (Handler uiHandler) {
 		super(TAG);
 		mUIHandler = uiHandler;
