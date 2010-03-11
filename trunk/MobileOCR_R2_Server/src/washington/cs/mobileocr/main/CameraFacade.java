@@ -146,7 +146,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
         
     private void setCameraParameters() {
         Camera.Parameters parameters = mCamera.getParameters();
-        parameters.setPreviewSize(mx, my);
+      
         parameters.setPictureSize(mx, my);
         
         parameters.setPictureFormat(PixelFormat.JPEG);
@@ -212,8 +212,7 @@ public class CameraFacade implements SurfaceHolder.Callback {
         }
         
         mPreviewCaptureInProgress = true;
-        //mCamera.takePicture(null, null, jpegCallback);
-        //mPreviewCaptureInProgress = true;
+      
         mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
           
             public void onPreviewFrame(byte[] data, Camera camera) {
