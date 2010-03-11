@@ -55,7 +55,7 @@ public class Server {
 			byte[] bmpBytes = baos.toByteArray(); 
 			InputStream inputStream = new ByteArrayInputStream(bmpBytes);
 
-			//Open a URL connection to the Servlet
+			//Open a URL connection to the server
 			URL url = new URL(urlString);
 
 			//Open a HTTP connection to the URL
@@ -70,7 +70,6 @@ public class Server {
 
 			//Use a post method.
 			conn.setRequestMethod("POST");
-
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
 
