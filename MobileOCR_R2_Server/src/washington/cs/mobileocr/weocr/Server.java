@@ -1,5 +1,18 @@
 package washington.cs.mobileocr.weocr;
 
+/**
+ * Copyright 2010, Josh Scotland & Hussein Yapit
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided you follow the BSD license.
+ * 
+ * 
+ * This class handles the server connection. It sends a bitmap image
+ * and receives text in return.
+ * TODO Set timeout limit
+ */
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -14,8 +27,6 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 public class Server {
-	
-	//TODO Set timeout limit
 
 	public static String doFileUpload(Bitmap b) {
 
@@ -37,7 +48,7 @@ public class Server {
 		
 		try {
 			//Client Request
-			Log.e(TAG,"Beginning client request");
+			Log.d(TAG,"Beginning client request");
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -50,10 +61,8 @@ public class Server {
 			//Open a HTTP connection to the URL
 			conn = (HttpURLConnection) url.openConnection();
 
-			//Allow Inputs
+			//Allow inputs and outputs
 			conn.setDoInput(true);
-
-			//Allow Outputs
 			conn.setDoOutput(true);
 
 			//Don't use a cached copy.
@@ -63,7 +72,6 @@ public class Server {
 			conn.setRequestMethod("POST");
 
 			conn.setRequestProperty("Connection", "Keep-Alive");
-			
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
 
 			dos = new DataOutputStream( conn.getOutputStream());
@@ -71,7 +79,7 @@ public class Server {
 			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + fileName +"\"" + lineEnd);
 			dos.writeBytes(lineEnd);
 
-			Log.e(TAG,"Headers are written");
+			Log.d(TAG,"Headers are written");
 
 			//Create a buffer of maximum size
 			bytesAvailable = inputStream.available();
@@ -93,7 +101,7 @@ public class Server {
 			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
 			//Close streams
-			Log.e(TAG,"File is written on server");
+			Log.d(TAG,"File is written on server");
 			inputStream.close();
 			dos.flush();
 			dos.close();
@@ -119,7 +127,7 @@ public class Server {
 			Log.e(TAG, "error: " + ioex.getMessage(), ioex);
 		}
 		
-		Log.e(TAG,"Server Response: " + responseFromServer.trim());
+		Log.d(TAG,"Server Response: " + responseFromServer.trim());
 		return responseFromServer.trim();
 	}
 

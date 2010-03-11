@@ -1,5 +1,16 @@
 package washington.cs.mobileocr.tts;
 
+/**
+ * Copyright 2010, Josh Scotland & Hussein Yapit
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided you follow the BSD license.
+ * 
+ * 
+ * This class handles all text to speech functions.
+ */
+
 import java.util.HashMap;
 
 import washington.cs.mobileocr.gestures.ScreenReaderGestureHandler;
@@ -12,22 +23,19 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 
-/**
- * Hussein Yapit & Josh Scotland
- * A TTS handler to play, pause, and queue TTS
- */
-
 public class TTSHandler implements OnUtteranceCompletedListener{
 
+	private final static String TAG = "TTSHandler";
+	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
+	
 	private static boolean mTtsInitialized;
 	private  TextToSpeech mTts;
 	private static TTSHandler ttsThread;
-	private final static String TAG = "TTS";
-	private final int queueMode = TextToSpeech.QUEUE_FLUSH;
 	private HashMap<String, String> ttsParams;
 	private Resources res;
 	private static Boolean doneSpeaking = true;
 
+	//Play speech based on where the message came from
 	private final Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			if (mTtsInitialized) {
@@ -49,50 +57,60 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		}
 	};
 
+	//Create an instance of the class
 	private TTSHandler() {
 		ttsThread = this;
 		ttsParams = new HashMap<String, String>();
 		mTtsInitialized = false;
 	}
 
+	//Return the instance of the class
 	public static TTSHandler getInstance() {
 		if (ttsThread == null)
 			ttsThread = new TTSHandler();
 		return ttsThread;
 	}
 	
+	//Free up resources when the TTS is done being used
 	public void TTSDestroy() {
 		mTts.shutdown();
 	}
 
+	//Set the context for the TTS
 	public void ttsSetContext(Context context) {
 		mTtsInitialized = false;
 		mTts = new TextToSpeech(context, ttsInitListener);
 	}
 
+	//Set the context for the TTS
 	public void ttsSetContext(Context context, Resources res) {
 		ttsSetContext(context);
 		this.res = res;
 	}
 
+	//Queue the message for the TTS engine
 	public static void ttsQueueMessage(int type) {
 		Message msg = TTSHandler.getInstance().mHandler.obtainMessage(type);
 		TTSHandler.getInstance().mHandler.sendMessage(msg);
 	}
 
+	//Queue the message received from the screen reader for the TTS engine
 	public static void ttsQueueSRMessage(String text) {
 		Message msg = TTSHandler.getInstance().mHandler.obtainMessage(R.id.screenreader_tts, text);
 		TTSHandler.getInstance().mHandler.sendMessage(msg);
 	}
 
+	//Set the parameters of the TTS HashMap
 	public void setParam(String key, String value) {
 		ttsParams.put(key, value);
 	}
 
+	//Clear the parameters of the TTS HashMap
 	public void clearParams() {
 		ttsParams.clear();
 	}
 
+	//Stop the speaking TTS
 	public void ttsStop() {
 		if (mTts != null) {
 			mTts.stop();
@@ -100,17 +118,17 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		}
 	}
 
+	//Initialization of the TTS, set the listener
 	private final TextToSpeech.OnInitListener ttsInitListener = new TextToSpeech.OnInitListener() {
 		public void onInit(int status) {
-			Log.d(TAG, "TTS init");
+			Log.d(TAG, "TTS initialization");
 			mTtsInitialized = true;
-			//NOTE: part of spaghetti code.
 			mTts.setOnUtteranceCompletedListener(TTSHandler.getInstance());
 			TTSHandler.ttsQueueMessage(R.string.tts_init);
 		}
 	};
 
-	//NOTE: spaghetti code. when there's time move to ScreenReaderGestureHandler.
+	//Listen for when the TTS is finished speaking (used in autoplay)
 	public void onUtteranceCompleted(String uttId) {
 		Log.d(TAG, "Utterance Complete");
 		setDoneSpeaking(true);
@@ -120,10 +138,12 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 		}
 	}
 
+	//Allows for publicly setting the variable
 	public void setDoneSpeaking(Boolean doneSpeaking) {
 		TTSHandler.doneSpeaking = doneSpeaking;
 	}
 
+	//Allows for publicly getting the variable
 	public static Boolean getDoneSpeaking() {
 		return doneSpeaking;
 	}
