@@ -44,13 +44,16 @@ public class Screenreader extends Activity implements OnGestureListener, TextToS
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screenreader);
+		
+		Bundle extras = this.getIntent().getExtras();
+		String passedString = extras != null ? extras.getString("resultString"): "Error: The string is not correct";
 
-		sentenceArray = TextParser.sentenceParse(BarcodeScan.getPassedString());
+		//sentenceArray = TextParser.sentenceParse(BarcodeScan.getPassedString());
+		sentenceArray = TextParser.sentenceParse(passedString);
 		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
 		wordArray = TextParser.wordParse(sentenceArray);
 
 		BarcodeScan.getmTts().setOnUtteranceCompletedListener(this);
-		//passedString = extras != null ? extras.getString("resultString"): "Error: The string is not correct";
 
 		gestureScanner = new GestureDetector(this);
 		gestureScanner.setOnDoubleTapListener(new OnDoubleTapListener(){
