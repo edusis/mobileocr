@@ -14,7 +14,7 @@ package washington.cs.mobileocr.main;
  * TODO: OnPause saves the current state of the screen reader
  */
 
-import washington.cs.mobileocr.gestures.NavigationGestureHandler;
+import washington.cs.mobileocr.gestures.ScreenReaderGestureHandler;
 import washington.cs.mobileocr.tts.TTSHandler;
 import android.app.Activity;
 import android.content.Intent;
@@ -25,12 +25,17 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 public class MobileOCR extends Activity {
 
 	private static final String TAG = "MobileOCR";
-	private GestureDetector gestureScanner;
 	private int MY_DATA_CHECK_CODE;
+	
+	private GestureDetector gestureScanner;
+	private static String[] sentenceArray;
+	private String[] wordArray;
+	private static int[] wordsInSentences;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,14 +45,25 @@ public class MobileOCR extends Activity {
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
-		
-		//Initialize gesture detector
-		gestureScanner = new GestureDetector(new NavigationGestureHandler());
+		setContentView(R.layout.main);
 		
 		//Initialize TTS engine and check for correct installation of TTS engine
 		Intent checkIntent = new Intent();
 		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
 		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+		
+		String passedString = "This is some test text for the screen reader application you are using. You can tap and hold the screen for instructions. Here is one more sentence just for the heck of it!";
+		
+		sentenceArray = TextParser.sentenceParse(passedString);
+		wordArray = TextParser.wordParse(sentenceArray);
+		wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
+		
+		TextView text = (TextView) findViewById(R.id.text);
+        text.setText(passedString);
+        
+        //Initialize gesture detector
+        ScreenReaderGestureHandler gHandler = new ScreenReaderGestureHandler(sentenceArray, wordsInSentences, wordArray);
+		gestureScanner = new GestureDetector(gHandler);
 	}
 	
 	//Method that checks to make sure the TTS is initialized correctly
@@ -57,7 +73,6 @@ public class MobileOCR extends Activity {
 				//Success, create the TTS instance
 				Log.d(TAG, "TTS engine check");
 				TTSHandler.getInstance().ttsSetContext(this, this.getResources());
-				startScreenReaderView("Hey how are you. This is a test.");
 			} else {
 				//Missing data, install it
 				Intent installIntent = new Intent();
@@ -85,12 +100,5 @@ public class MobileOCR extends Activity {
 	public void onDestroy() {
 		super.onDestroy();
 		TTSHandler.getInstance().TTSDestroy();
-	}
-
-	//Creates an intent to start ScreenReader Activity
-	private void startScreenReaderView(String result) {
-		Intent i = new Intent(this, ScreenReader.class);
-		i.putExtra("resultString", result);
-		startActivity (i);
 	}
 }
