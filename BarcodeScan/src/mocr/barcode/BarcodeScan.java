@@ -11,7 +11,6 @@ import android.widget.Button;
 public class BarcodeScan extends Activity {
 
 	private static TextToSpeech mTts;
-	private static String passedString = "HI";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +38,7 @@ public class BarcodeScan extends Activity {
 		if (requestCode == 0) {
 			if (resultCode == RESULT_OK) {
 				String contents = intent.getStringExtra("SCAN_RESULT");
-				String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+				//String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
 				// Handle successful scan
 				mTts.stop();
 				startScreenReaderView(contents);
@@ -54,10 +53,6 @@ public class BarcodeScan extends Activity {
 		Intent i = new Intent(this, Screenreader.class);
 		i.putExtra("resultString", result);
 		startActivity (i);
-	}
-
-	public static String getPassedString() {
-		return passedString;
 	}
 
 	public static TextToSpeech getmTts() {
