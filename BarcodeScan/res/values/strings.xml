@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, MOCRMain!</string>
+    <string name="hello">Hello World!</string>
     <string name="app_name">Barcode Scan</string>
     <string name="tts_hello">Hello.</string>
     <string name="tts_demo">Look we are supposed to be winning the hearts and the minds of the natives. Isn't that the whole point of your little puppet show? You look like them and you talk like them and they will start trusting us. We built them a school, we teach them english but after that. How many years?</string>
     <string name="tts_helpOn">Help turned on.</string>
-    <string name="tts_init">Welcome to Mobile OCR. Tap and hold the screen for instructions.</string>
+    <string name="tts_init">Welcome. Tap the screen and scan a barcode.</string>
     <string name="tts_sr_instruction">Fling up or down to change modes. Tap to play or pause current text. Fling left and right to navigate text. Double tap to play continuously. Tap and hold to repeat the instructions</string>
 	<string name="tts_nav_instruction">Currently in picture taking mode. Use the camera to take a picture.</string>
 </resources>
