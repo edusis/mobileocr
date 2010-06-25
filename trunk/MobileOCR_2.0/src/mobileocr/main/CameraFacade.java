@@ -12,13 +12,21 @@ package mobileocr.main;
  * This class handles the camera functions.
  */
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import mobileocr.main.R;
 import mobileocr.tts.TTSHandler;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
@@ -26,15 +34,17 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.media.MediaPlayer;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback {
 
-	public static final String CAMERA_TAG = "CameraFacade";
+	public static final String TAG = "CameraFacade";
 
 	/*
 	private boolean mAutoFocusInProgress;
@@ -48,6 +58,8 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
 	private MediaPlayer mp;
+	
+	private Handler mUIHandler = null;
 	
 	public CameraFacade(Context context) {
         super(context);
@@ -135,20 +147,31 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 
     ShutterCallback shutterCallback = new ShutterCallback() {
     	public void onShutter() {
-    		// TODO Do something when the shutter closes.
+    		// TODO Do something when the shutter closes
     	}
     };
 
     PictureCallback rawCallback = new PictureCallback() {
-    	public void onPictureTaken(byte[] _data, Camera _camera) {
-    		// TODO Do something with the image RAW data.
+    	public void onPictureTaken(byte[] data, Camera camera) {
+    		// TODO Do something with the image RAW data
     	}
     };
 
     PictureCallback jpegCallback = new PictureCallback() {
-    	public void onPictureTaken(byte[] _data, Camera _camera) {
+    	public void onPictureTaken(byte[] data, Camera camera) {
     		mp.start();
-    		TTSHandler.ttsQueueSRMessage("Picture Taken");
+    		
+    		BitmapFactory.Options options = new BitmapFactory.Options();
+			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
+			try {
+				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
+				bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			TTSHandler.ttsQueueSRMessage("Picture Taken");
     	}
     };
 
