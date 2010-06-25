@@ -47,11 +47,13 @@ public class MobileOCR extends Activity {
 	public static boolean instructionFlag = true;
 	private GestureDetector gestureScanner;
 	private ConnectivityManager mConnectivityManager;
-	private CameraFacade cameraFacade;
+	//private CameraFacade cameraFacade;
 	private OCRThread mOCRThread;
 	private int MY_DATA_CHECK_CODE;
 	//private Vibrator mVibrator = null;
 	private boolean mIsNotified = true;
+	
+	private CameraFacade mPreview;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,9 +69,12 @@ public class MobileOCR extends Activity {
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 		//initNetworkNotify();
 
-		SurfaceView view = new SurfaceView(this);
-		cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
-		setContentView(view);
+		//SurfaceView view = new SurfaceView(this);
+		//cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
+		//setContentView(view);
+		
+		mPreview = new CameraFacade(this);
+        setContentView(mPreview);
 
 		//Restore preferences
 		restoreState();
@@ -170,7 +175,7 @@ public class MobileOCR extends Activity {
 		startOCRThread();
 		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		//registerReceiver(mConnectivityReceiver, filter, null, mHandler);
-		cameraFacade.onResume();
+		//cameraFacade.onResume();
 	}
 
 	protected void onPause() {
@@ -194,12 +199,12 @@ public class MobileOCR extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_FOCUS) {
 			if (event.getRepeatCount() == 0) {
-				cameraFacade.requestAutoFocus();
+				//cameraFacade.requestAutoFocus();
 			}
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_CAMERA) {
 			if (event.getRepeatCount() == 0) {
-				cameraFacade.requestPreviewFrame();
+				mPreview.takePicture();
 			}
 			return true;
 		} else {
@@ -227,24 +232,24 @@ public class MobileOCR extends Activity {
 			switch (msg.what) {
 			case R.id.msg_camera_auto_focus:
 				int status = msg.arg1;
-				cameraFacade.clearAutoFocus();
-				if (status == CameraFacade.AUTOFOCUS_SUCCESS) {
-					cameraFacade.requestPreviewFrame();
-				}
+				//cameraFacade.clearAutoFocus();
+				//if (status == CameraFacade.AUTOFOCUS_SUCCESS) {
+				//mPreview.takePicture();
+				//}
 				break;
 			case R.id.msg_camera_preview_frame:
 				Handler ocrHandler = mOCRThread.getHandler();
-				int width = cameraFacade.getWidth();
-				int height = cameraFacade.getHeight();
-				Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
-				ocrHandler.sendMessage(preprocessMsg);
+				//int width = cameraFacade.getWidth();
+				//int height = cameraFacade.getHeight();
+				//Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
+				//ocrHandler.sendMessage(preprocessMsg);
 				break;
 			case R.id.msg_ui_ocr_success:
-				cameraFacade.onPause();
+				//cameraFacade.onPause();
 				startScreenReaderView((String)msg.obj);
 				break;
 			case R.id.msg_ui_ocr_fail:
-				cameraFacade.startPreview();
+				//cameraFacade.startPreview();
 				break;
 			}
 		}
