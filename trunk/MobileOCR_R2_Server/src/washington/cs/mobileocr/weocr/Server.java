@@ -44,7 +44,7 @@ public class Server {
 		byte[] buffer;
 		int maxBufferSize = 1*1024*1024;
 		String responseFromServer = "";
-		String urlString = "http://abstract.cs.washington.edu/~koemon/mobileocr/upload.php";
+		String urlString = "http://abstract.cs.washington.edu/~koemon/mobileocr/upload_2.php";
 		
 		try {
 			//Client Request
