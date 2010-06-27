@@ -73,7 +73,7 @@ public class MobileOCR extends Activity {
 		//cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
 		//setContentView(view);
 		
-		mPreview = new CameraFacade(this);
+		mPreview = new CameraFacade(this, mHandler);
         setContentView(mPreview);
 
 		//Restore preferences

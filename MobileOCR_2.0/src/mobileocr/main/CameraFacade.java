@@ -61,9 +61,9 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 	private Camera mCamera;
 	private MediaPlayer mp;
 	
-	private Handler mUIHandler = null;
+	private Handler mHandler = null;
 	
-	public CameraFacade(Context context) {
+	public CameraFacade(Context context, Handler UIHandler) {
         super(context);
         
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -71,6 +71,8 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        
+        mHandler = UIHandler;
         
         // MediaPlayer for the camera shutter sound
         mp = MediaPlayer.create(context, R.raw.camera1);
@@ -188,9 +190,12 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 			}
 			
 			*/
+    		
+    		String s = Server.doFileUpload(data);
+    		Message success = mHandler.obtainMessage(R.id.msg_ui_ocr_success, s);
+			mHandler.sendMessage(success);
 			
 			//String s = Server.doFileUpload(bmp);
-			String s = Server.doFileUpload(data);
 			//TTSHandler.ttsQueueSRMessage(s);
 
 			//TTSHandler.ttsQueueSRMessage("Picture Saved");
