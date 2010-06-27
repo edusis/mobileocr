@@ -34,7 +34,7 @@ public class Server {
 		HttpURLConnection conn = null;
 		DataOutputStream dos = null;
 		DataInputStream inStream = null;
-		String fileName = "doOCR.png";
+		String fileName = "doOCR.jpeg";
 
 		String lineEnd = "\r\n";
 		String twoHyphens = "--";
@@ -45,6 +45,7 @@ public class Server {
 		int maxBufferSize = 1*1024*1024;
 		String responseFromServer = "";
 		String urlString = "http://abstract.cs.washington.edu/~koemon/mobileocr/upload.php";
+		//String urlString = "http://mobileocr.cs.washington.edu/process/upload.php";
 		
 		try {
 			//Client Request
