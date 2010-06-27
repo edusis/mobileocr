@@ -38,10 +38,10 @@ public class OCRThread extends HandlerThread {
 				switch (msg.what) {
 				case R.id.msg_ocr_recognize:
 					TTSHandler.ttsQueueSRMessage("Processing image, please wait");
-					Bitmap bmp = asBitmap(msg.arg1, msg.arg2,(byte[])msg.obj);
-					String ocrText = Server.doFileUpload(bmp);
-					Message success = mUIHandler.obtainMessage(R.id.msg_ui_ocr_success, ocrText);
-					mUIHandler.sendMessage(success);
+					//Bitmap bmp = asBitmap(msg.arg1, msg.arg2,(byte[])msg.obj);
+					//String ocrText = Server.doFileUpload(bmp);
+					//Message success = mUIHandler.obtainMessage(R.id.msg_ui_ocr_success, ocrText);
+					//mUIHandler.sendMessage(success);
 					break;
 				case R.id.msg_ocr_quit:
 					getLooper().quit();
