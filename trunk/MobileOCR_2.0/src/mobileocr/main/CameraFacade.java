@@ -22,9 +22,11 @@ import java.io.OutputStream;
 import java.util.List;
 
 import mobileocr.main.R;
+import mobileocr.server.Server;
 import mobileocr.tts.TTSHandler;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
@@ -147,13 +149,13 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 
     ShutterCallback shutterCallback = new ShutterCallback() {
     	public void onShutter() {
-    		// TODO Do something when the shutter closes
+    		TTSHandler.ttsQueueSRMessage("Saving Picture");
     	}
     };
 
     PictureCallback rawCallback = new PictureCallback() {
     	public void onPictureTaken(byte[] data, Camera camera) {
-    		// TODO Do something with the image RAW data
+
     	}
     };
 
@@ -161,17 +163,33 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
     	public void onPictureTaken(byte[] data, Camera camera) {
     		mp.start();
     		
-    		BitmapFactory.Options options = new BitmapFactory.Options();
-			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
+    		//BitmapFactory.Options options = new BitmapFactory.Options();
+    		//options.inSampleSize = 2;
+    		//options.inTargetDensity = 200;
+			//Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+			
+			/*
+			// This will save an image to the sdcard. Three important points:
+			// 1. Allow external storage permission, 
+			// 2. Use Environment.getExternalStorageDirectory()
+			// 3. Create an empty file in the sdcard before writing otherwise, File Not Found errors
+			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.png");
 			try {
-				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
+				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.png");
 				bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+				Log.i(TAG, "Picture Saved");
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(TAG, "Exception: " + e.getMessage(), e);
 			}
+			
+			*/
+			
+			
+			//String s = Server.doFileUpload(bmp);
+			String s = Server.doFileUpload(data);
+			//TTSHandler.ttsQueueSRMessage(s);
 
-			TTSHandler.ttsQueueSRMessage("Picture Taken");
+			//TTSHandler.ttsQueueSRMessage("Picture Saved");
     	}
     };
 

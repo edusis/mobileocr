@@ -28,7 +28,7 @@ import android.util.Log;
 
 public class Server {
 
-	public static String doFileUpload(Bitmap b) {
+	public static String doFileUpload(byte[] data) {
 
 		final String TAG = "Server";
 		HttpURLConnection conn = null;
@@ -48,12 +48,12 @@ public class Server {
 		
 		try {
 			//Client Request
-			Log.d(TAG,"Beginning client request");
+			Log.i(TAG,"Beginning client request");
 
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			b.compress(Bitmap.CompressFormat.PNG, 100, baos);
-			byte[] bmpBytes = baos.toByteArray(); 
-			InputStream inputStream = new ByteArrayInputStream(bmpBytes);
+			//ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			//b.compress(Bitmap.CompressFormat.PNG, 100, baos);
+			//byte[] bmpBytes = baos.toByteArray(); 
+			InputStream inputStream = new ByteArrayInputStream(data);
 
 			//Open a URL connection to the server
 			URL url = new URL(urlString);
@@ -100,17 +100,17 @@ public class Server {
 			dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
 			//Close streams
-			Log.d(TAG,"File is written on server");
+			Log.i(TAG,"File is written on server");
 			inputStream.close();
 			dos.flush();
 			dos.close();
 		}
 		catch (MalformedURLException ex) {
-			Log.e(TAG, "error: " + ex.getMessage(), ex);
+			Log.e(TAG, "MalformedURLException: " + ex.getMessage(), ex);
 		}
 
 		catch (IOException ioe) {
-			Log.e(TAG, "error: " + ioe.getMessage(), ioe);
+			Log.e(TAG, "IOException: " + ioe.getMessage(), ioe);
 		}
 
 		//Read the server response
@@ -123,10 +123,10 @@ public class Server {
 			inStream.close();
 		}
 		catch (IOException ioex) {
-			Log.e(TAG, "error: " + ioex.getMessage(), ioex);
+			Log.e(TAG, "IOException: " + ioex.getMessage(), ioex);
 		}
 		
-		Log.d(TAG,"Server Response: " + responseFromServer.trim());
+		Log.i(TAG,"Server Response: " + responseFromServer.trim());
 		return responseFromServer.trim();
 	}
 
