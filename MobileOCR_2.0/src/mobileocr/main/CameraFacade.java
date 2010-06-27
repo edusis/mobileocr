@@ -163,27 +163,31 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
     	public void onPictureTaken(byte[] data, Camera camera) {
     		mp.start();
     		
-    		//BitmapFactory.Options options = new BitmapFactory.Options();
-    		//options.inSampleSize = 2;
-    		//options.inTargetDensity = 200;
-			//Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    		// Camera still running
+    		
+
 			
 			/*
 			// This will save an image to the sdcard. Three important points:
 			// 1. Allow external storage permission, 
 			// 2. Use Environment.getExternalStorageDirectory()
 			// 3. Create an empty file in the sdcard before writing otherwise, File Not Found errors
-			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.png");
+    		
+    		BitmapFactory.Options options = new BitmapFactory.Options();
+    		//options.inSampleSize = 2;
+    		//options.inTargetDensity = 200;
+			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+    		
+			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
 			try {
-				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.png");
-				bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
+				bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
 				Log.i(TAG, "Picture Saved");
 			} catch (Exception e) {
 				Log.e(TAG, "Exception: " + e.getMessage(), e);
 			}
 			
 			*/
-			
 			
 			//String s = Server.doFileUpload(bmp);
 			String s = Server.doFileUpload(data);
