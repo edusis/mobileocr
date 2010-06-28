@@ -1,4 +1,3 @@
-
 package mobileocr.main;
 
 /**
@@ -7,59 +6,42 @@ package mobileocr.main;
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided you follow the BSD license.
- * 
- * Used Will Johnson's camera facade as an example.
- * This class handles the camera functions.
  */
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
-import mobileocr.main.R;
-import mobileocr.server.Server;
-import mobileocr.tts.TTSHandler;
-
+import mobileocr.server.DoServerOCR;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.media.MediaPlayer;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+/*
+ * Based off of Google's camera API example
+ * This class handles the camera functions.
+ */
 
 public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback {
 
 	public static final String TAG = "CameraFacade";
 
-	/*
-	private boolean mAutoFocusInProgress;
-	private boolean mPreviewCaptureInProgress;
+	private boolean autoFocusInProgress;
+	private boolean previewCaptureInProgress;
 
 	public static final int AUTOFOCUS_UNKNOWN = 0;
 	public static final int AUTOFOCUS_SUCCESS = 1;
 	public static final int AUTOFOCUS_FAILURE = 2;
-	*/
 
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
-	private MediaPlayer mp;
+	private MediaPlayer mMediaPlayer;
 	
 	private Handler mHandler = null;
 	
@@ -72,10 +54,11 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         
+        // Handles messages Mobile OCR Main is listening to
         mHandler = UIHandler;
         
         // MediaPlayer for the camera shutter sound
-        mp = MediaPlayer.create(context, R.raw.camera1);
+        mMediaPlayer = MediaPlayer.create(context, R.raw.camera1);
     }
 	
     public void surfaceCreated(SurfaceHolder holder) {
@@ -91,9 +74,7 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
     }
     
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // Surface will be destroyed when we return, so stop the preview.
-        // Because the CameraDevice object is not a shared resource, it's very
-        // important to release it when the activity is paused.
+        // Stop the preview and free the camera from the resources
         mCamera.stopPreview();
         mCamera.release();
         mCamera = null;
@@ -133,8 +114,7 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // Now that the size is known, set up the camera parameters and begin
-        // the preview.
+        // Set up the camera parameters and begin the preview.
         Camera.Parameters parameters = mCamera.getParameters();
 
         List<Size> sizes = parameters.getSupportedPreviewSizes();
@@ -146,29 +126,28 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
     }
     
     public void takePicture() {
+		if (autoFocusInProgress || previewCaptureInProgress) {
+			return;
+		}
+		previewCaptureInProgress = true;
     	mCamera.takePicture(shutterCallback, rawCallback, jpegCallback); 
     }
 
     ShutterCallback shutterCallback = new ShutterCallback() {
     	public void onShutter() {
-    		TTSHandler.ttsQueueSRMessage("Saving Picture");
+    		// Play a shutter sound
+    		mMediaPlayer.start();
     	}
     };
 
     PictureCallback rawCallback = new PictureCallback() {
     	public void onPictureTaken(byte[] data, Camera camera) {
-
+    		// Not using the raw YUV format
     	}
     };
 
     PictureCallback jpegCallback = new PictureCallback() {
     	public void onPictureTaken(byte[] data, Camera camera) {
-    		mp.start();
-    		
-    		// Camera still running
-    		
-
-			
 			/*
 			// This will save an image to the sdcard. Three important points:
 			// 1. Allow external storage permission, 
@@ -188,17 +167,12 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 			} catch (Exception e) {
 				Log.e(TAG, "Exception: " + e.getMessage(), e);
 			}
-			
 			*/
     		
-    		String s = Server.doFileUpload(data);
-    		Message success = mHandler.obtainMessage(R.id.msg_ui_ocr_success, s);
+    		String ocrResult = DoServerOCR.getOCRResponse(data);
+    		
+    		Message success = mHandler.obtainMessage(R.id.msg_ocr_success, ocrResult);
 			mHandler.sendMessage(success);
-			
-			//String s = Server.doFileUpload(bmp);
-			//TTSHandler.ttsQueueSRMessage(s);
-
-			//TTSHandler.ttsQueueSRMessage("Picture Saved");
     	}
     };
 
@@ -224,41 +198,15 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 		*/
 	}
 	
-	/*
-
 	public void requestAutoFocus () {
-		if (mAutoFocusInProgress || mPreviewCaptureInProgress) {
+		if (autoFocusInProgress || previewCaptureInProgress) {
 			return;
 		}
-		mAutoFocusInProgress = true;
+		autoFocusInProgress = true;
 		mCamera.autoFocus(new Camera.AutoFocusCallback() { 
 			public void onAutoFocus(boolean success, Camera camera) {
-				Message msg = mUIHandler.obtainMessage(R.id.msg_camera_auto_focus, 
-						success ? AUTOFOCUS_SUCCESS : AUTOFOCUS_FAILURE, -1);
-				mUIHandler.sendMessage(msg);
+				autoFocusInProgress = false;
 			}
 		});
 	}
-
-	public void clearAutoFocus() {
-		mAutoFocusInProgress = false;
-	}
-
-	public void requestPreviewFrame () {
-		if (mAutoFocusInProgress || mPreviewCaptureInProgress) {
-			return;
-		}
-		mPreviewCaptureInProgress = true;
-		mCamera.setOneShotPreviewCallback(new Camera.PreviewCallback() {
-			public void onPreviewFrame(byte[] data, Camera camera) {
-				Message msg = mUIHandler.obtainMessage(R.id.msg_camera_preview_frame, data);
-				mUIHandler.sendMessage(msg);
-				mCamera.stopPreview();
-				mCamera.release();
-				mCamera = null;
-			}
-		});
-	}
-	*/
-
 }
