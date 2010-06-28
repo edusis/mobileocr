@@ -7,11 +7,6 @@ package mobileocr.main;
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided you follow the BSD license.
- * 
- * 
- * This class is the screen reader activity. It uses the
- * screen reader gesture handler to navigate the text.
- * TODO: OnPause saves the current state of the screen reader
  */
 
 import mobileocr.gestures.NavigationGestureHandler;
@@ -38,6 +33,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
+
+/*
+ * This class is the screen reader activity. It uses the
+ * screen reader gesture handler to navigate the text.
+ */
 
 public class MobileOCR extends Activity {
 
@@ -199,7 +199,7 @@ public class MobileOCR extends Activity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_FOCUS) {
 			if (event.getRepeatCount() == 0) {
-				//cameraFacade.requestAutoFocus();
+				mPreview.requestAutoFocus();
 			}
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_CAMERA) {
@@ -239,16 +239,14 @@ public class MobileOCR extends Activity {
 				break;
 			case R.id.msg_camera_preview_frame:
 				Handler ocrHandler = mOCRThread.getHandler();
-				//int width = cameraFacade.getWidth();
-				//int height = cameraFacade.getHeight();
 				//Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
 				//ocrHandler.sendMessage(preprocessMsg);
 				break;
-			case R.id.msg_ui_ocr_success:
+			case R.id.msg_ocr_success:
 				//cameraFacade.onPause();
 				startScreenReaderView((String)msg.obj);
 				break;
-			case R.id.msg_ui_ocr_fail:
+			case R.id.msg_ocr_fail:
 				//cameraFacade.startPreview();
 				break;
 			}

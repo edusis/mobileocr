@@ -6,15 +6,9 @@ package mobileocr.server;
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided you follow the BSD license.
- * 
- * 
- * This class handles the server connection. It sends a bitmap image
- * and receives text in return.
- * TODO Set timeout limit
  */
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -23,53 +17,48 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
-public class Server {
+/*
+ * This class handles the server connection. It sends the jpeg byte[]
+ * to the server for OCR processing.
+ */
 
-	public static String doFileUpload(byte[] data) {
+public class DoServerOCR {
 
-		final String TAG = "Server";
+	public static String getOCRResponse(byte[] data) {
+
+		final String TAG = "DoServerOCR";
+
+		// Server variables
 		HttpURLConnection conn = null;
 		DataOutputStream dos = null;
 		DataInputStream inStream = null;
-		String fileName = "doOCR.jpeg";
-
-		String lineEnd = "\r\n";
-		String twoHyphens = "--";
-		String boundary =  "*****";
-
 		int bytesRead, bytesAvailable, bufferSize;
 		byte[] buffer;
 		int maxBufferSize = 1*1024*1024;
+
+		String fileName = "doOCR.jpeg";
+		String lineEnd = "\r\n";
+		String twoHyphens = "--";
+		String boundary =  "*****";
 		String responseFromServer = "";
 		String urlString = "http://abstract.cs.washington.edu/~koemon/mobileocr/upload.php";
 		//String urlString = "http://mobileocr.cs.washington.edu/process/upload.php";
-		
+
 		try {
-			//Client Request
 			Log.i(TAG,"Beginning client request");
 
-			//ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			//b.compress(Bitmap.CompressFormat.PNG, 100, baos);
-			//byte[] bmpBytes = baos.toByteArray(); 
 			InputStream inputStream = new ByteArrayInputStream(data);
 
 			//Open a URL connection to the server
 			URL url = new URL(urlString);
-
-			//Open a HTTP connection to the URL
 			conn = (HttpURLConnection) url.openConnection();
-
-			//Allow inputs and outputs
 			conn.setDoInput(true);
 			conn.setDoOutput(true);
-
-			//Don't use a cached copy.
 			conn.setUseCaches(false);
 
-			//Use a post method.
+			//Use a multipart POST
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Connection", "Keep-Alive");
 			conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+boundary);
@@ -79,7 +68,7 @@ public class Server {
 			dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + fileName +"\"" + lineEnd);
 			dos.writeBytes(lineEnd);
 
-			Log.d(TAG,"Headers are written");
+			Log.i(TAG,"Headers are written");
 
 			//Create a buffer of maximum size
 			bytesAvailable = inputStream.available();
@@ -108,10 +97,11 @@ public class Server {
 		}
 		catch (MalformedURLException ex) {
 			Log.e(TAG, "MalformedURLException: " + ex.getMessage(), ex);
+			responseFromServer = "EC#1";
 		}
-
 		catch (IOException ioe) {
 			Log.e(TAG, "IOException: " + ioe.getMessage(), ioe);
+			responseFromServer = "EC#1";
 		}
 
 		//Read the server response
@@ -125,8 +115,9 @@ public class Server {
 		}
 		catch (IOException ioex) {
 			Log.e(TAG, "IOException: " + ioex.getMessage(), ioex);
+			responseFromServer = "EC#1";
 		}
-		
+
 		Log.i(TAG,"Server Response: " + responseFromServer.trim());
 		return responseFromServer.trim();
 	}
