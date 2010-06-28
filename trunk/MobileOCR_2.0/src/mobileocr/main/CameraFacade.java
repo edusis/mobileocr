@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 import mobileocr.server.DoServerOCR;
+import mobileocr.tts.TTSHandler;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -42,123 +43,123 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
 	private MediaPlayer mMediaPlayer;
-	
+
 	private Handler mHandler = null;
-	
+
 	public CameraFacade(Context context, Handler UIHandler) {
-        super(context);
-        
-        // Install a SurfaceHolder.Callback so we get notified when the
-        // underlying surface is created and destroyed.
-        mHolder = getHolder();
-        mHolder.addCallback(this);
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        
-        // Handles messages Mobile OCR Main is listening to
-        mHandler = UIHandler;
-        
-        // MediaPlayer for the camera shutter sound
-        mMediaPlayer = MediaPlayer.create(context, R.raw.camera1);
-    }
-	
-    public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, acquire the camera and tell it where
-        // to draw.
-        mCamera = Camera.open();
-        try {
-           mCamera.setPreviewDisplay(holder);
-        } catch (IOException exception) {
-            mCamera.release();
-            mCamera = null;
-        }
-    }
-    
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // Stop the preview and free the camera from the resources
-        mCamera.stopPreview();
-        mCamera.release();
-        mCamera = null;
-    }
+		super(context);
 
-    private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
-        final double ASPECT_TOLERANCE = 0.05;
-        double targetRatio = (double) w / h;
-        if (sizes == null) return null;
+		// Install a SurfaceHolder.Callback so we get notified when the
+		// underlying surface is created and destroyed.
+		mHolder = getHolder();
+		mHolder.addCallback(this);
+		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-        Size optimalSize = null;
-        double minDiff = Double.MAX_VALUE;
+		// Handles messages Mobile OCR Main is listening to
+		mHandler = UIHandler;
 
-        int targetHeight = h;
+		// MediaPlayer for the camera shutter sound
+		mMediaPlayer = MediaPlayer.create(context, R.raw.camera1);
+	}
 
-        // Try to find an size match aspect ratio and size
-        for (Size size : sizes) {
-            double ratio = (double) size.width / size.height;
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
-            if (Math.abs(size.height - targetHeight) < minDiff) {
-                optimalSize = size;
-                minDiff = Math.abs(size.height - targetHeight);
-            }
-        }
+	public void surfaceCreated(SurfaceHolder holder) {
+		// The Surface has been created, acquire the camera and tell it where
+		// to draw.
+		mCamera = Camera.open();
+		try {
+			mCamera.setPreviewDisplay(holder);
+		} catch (IOException exception) {
+			mCamera.release();
+			mCamera = null;
+		}
+	}
 
-        // Cannot find the one match the aspect ratio, ignore the requirement
-        if (optimalSize == null) {
-            minDiff = Double.MAX_VALUE;
-            for (Size size : sizes) {
-                if (Math.abs(size.height - targetHeight) < minDiff) {
-                    optimalSize = size;
-                    minDiff = Math.abs(size.height - targetHeight);
-                }
-            }
-        }
-        return optimalSize;
-    }
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		// Stop the preview and free the camera from the resources
+		mCamera.stopPreview();
+		mCamera.release();
+		mCamera = null;
+	}
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // Set up the camera parameters and begin the preview.
-        Camera.Parameters parameters = mCamera.getParameters();
+	private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
+		final double ASPECT_TOLERANCE = 0.05;
+		double targetRatio = (double) w / h;
+		if (sizes == null) return null;
 
-        List<Size> sizes = parameters.getSupportedPreviewSizes();
-        Size optimalSize = getOptimalPreviewSize(sizes, w, h);
-        parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+		Size optimalSize = null;
+		double minDiff = Double.MAX_VALUE;
 
-        mCamera.setParameters(parameters);
-        mCamera.startPreview();
-    }
-    
-    public void takePicture() {
+		int targetHeight = h;
+
+		// Try to find an size match aspect ratio and size
+		for (Size size : sizes) {
+			double ratio = (double) size.width / size.height;
+			if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+			if (Math.abs(size.height - targetHeight) < minDiff) {
+				optimalSize = size;
+				minDiff = Math.abs(size.height - targetHeight);
+			}
+		}
+
+		// Cannot find the one match the aspect ratio, ignore the requirement
+		if (optimalSize == null) {
+			minDiff = Double.MAX_VALUE;
+			for (Size size : sizes) {
+				if (Math.abs(size.height - targetHeight) < minDiff) {
+					optimalSize = size;
+					minDiff = Math.abs(size.height - targetHeight);
+				}
+			}
+		}
+		return optimalSize;
+	}
+
+	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		// Set up the camera parameters and begin the preview.
+		Camera.Parameters parameters = mCamera.getParameters();
+
+		List<Size> sizes = parameters.getSupportedPreviewSizes();
+		Size optimalSize = getOptimalPreviewSize(sizes, w, h);
+		parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+
+		mCamera.setParameters(parameters);
+		mCamera.startPreview();
+	}
+
+	public void takePicture() {
 		if (autoFocusInProgress || previewCaptureInProgress) {
 			return;
 		}
 		previewCaptureInProgress = true;
-    	mCamera.takePicture(shutterCallback, rawCallback, jpegCallback); 
-    }
+		mCamera.takePicture(shutterCallback, rawCallback, jpegCallback); 
+	}
 
-    ShutterCallback shutterCallback = new ShutterCallback() {
-    	public void onShutter() {
-    		// Play a shutter sound
-    		mMediaPlayer.start();
-    	}
-    };
+	ShutterCallback shutterCallback = new ShutterCallback() {
+		public void onShutter() {
+			// Play a shutter sound
+			mMediaPlayer.start();
+		}
+	};
 
-    PictureCallback rawCallback = new PictureCallback() {
-    	public void onPictureTaken(byte[] data, Camera camera) {
-    		// Not using the raw YUV format
-    	}
-    };
+	PictureCallback rawCallback = new PictureCallback() {
+		public void onPictureTaken(byte[] data, Camera camera) {
+			// Not using the raw YUV format
+		}
+	};
 
-    PictureCallback jpegCallback = new PictureCallback() {
-    	public void onPictureTaken(byte[] data, Camera camera) {
+	PictureCallback jpegCallback = new PictureCallback() {
+		public void onPictureTaken(byte[] data, Camera camera) {
 			/*
 			// This will save an image to the sdcard. Three important points:
 			// 1. Allow external storage permission, 
 			// 2. Use Environment.getExternalStorageDirectory()
 			// 3. Create an empty file in the sdcard before writing otherwise, File Not Found errors
-    		
+
     		BitmapFactory.Options options = new BitmapFactory.Options();
     		//options.inSampleSize = 2;
     		//options.inTargetDensity = 200;
 			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-    		
+
 			File file = new File(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
 			try {
 				FileOutputStream out = new FileOutputStream(Environment.getExternalStorageDirectory() + "/mocr.jpeg");
@@ -167,22 +168,20 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 			} catch (Exception e) {
 				Log.e(TAG, "Exception: " + e.getMessage(), e);
 			}
-			*/
-    		
-    		String ocrResult = DoServerOCR.getOCRResponse(data);
-    		
-    		Message success = mHandler.obtainMessage(R.id.msg_ocr_success, ocrResult);
+			 */
+			
+			
+			String ocrResult = DoServerOCR.getOCRResponse(data);
+
+			Message success = mHandler.obtainMessage(R.id.msg_ocr_success, ocrResult);
 			mHandler.sendMessage(success);
-    	}
-    };
+			
+			previewCaptureInProgress = false;
+		}
+	};
 
 	public void onResume() {
-		/*
-		if(surfaceExists && mCamera == null) {
-			startCamera();
-			setCameraParameters();
-		}
-		*/
+		
 	}
 
 	public void onPause() {
@@ -195,9 +194,9 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 			mCamera.release();
 			mCamera = null;
 		}
-		*/
+		 */
 	}
-	
+
 	public void requestAutoFocus () {
 		if (autoFocusInProgress || previewCaptureInProgress) {
 			return;

@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Mobile OCR</string>
     <string name="tts_init">Welcome to Mobile OCR. Tap and hold the screen for instructions.</string>
+    <string name="tts_no_network">Welcome to Mobile OCR. Please make sure you can connect to the internet.</string>
     <string name="tts_sr_instruction">Fling up or down to change modes. Tap to play or pause current text. Fling left and right to navigate text. Double tap to play continuously. Tap and hold to repeat the instructions</string>
 	<string name="tts_nav_instruction">Currently in picture taking mode. Use the camera to take a picture.</string>
 </resources>

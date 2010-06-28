@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 import mobileocr.gestures.ScreenReaderGestureHandler;
 
+import mobileocr.main.MobileOCR;
 import mobileocr.main.R;
 import android.content.Context;
 import android.content.res.Resources;
@@ -125,7 +126,12 @@ public class TTSHandler implements OnUtteranceCompletedListener{
 			Log.d(TAG, "TTS initialization");
 			mTtsInitialized = true;
 			mTts.setOnUtteranceCompletedListener(TTSHandler.getInstance());
-			TTSHandler.ttsQueueMessage(R.string.tts_init);
+
+			// Check for a network connection
+			if (MobileOCR.initNetworkNotify())
+				TTSHandler.ttsQueueMessage(R.string.tts_no_network);
+			else
+				TTSHandler.ttsQueueMessage(R.string.tts_init);
 		}
 	};
 
