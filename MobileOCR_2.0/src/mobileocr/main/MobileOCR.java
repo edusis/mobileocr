@@ -1,4 +1,3 @@
-
 package mobileocr.main;
 
 /**
@@ -10,27 +9,21 @@ package mobileocr.main;
  */
 
 import mobileocr.gestures.NavigationGestureHandler;
-import mobileocr.server.OCRThread;
 import mobileocr.tts.TTSHandler;
-import mobileocr.main.R;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -42,58 +35,49 @@ import android.view.WindowManager;
 public class MobileOCR extends Activity {
 
 	private static final String INSTRUCTION_KEY = "INSTRUCTION_KEY";
-	private static final String TAG = "MobileOCR";
+	private static final String TAG = "Mobile OCR";
 
 	public static boolean instructionFlag = true;
 	private GestureDetector gestureScanner;
-	private ConnectivityManager mConnectivityManager;
-	//private CameraFacade cameraFacade;
-	private OCRThread mOCRThread;
-	private int MY_DATA_CHECK_CODE;
-	//private Vibrator mVibrator = null;
-	private boolean mIsNotified = true;
-	
+	private static ConnectivityManager mConnectivityManager;
+	private int ttsDataCheck;
+
 	private CameraFacade mPreview;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//Clear title bar and notification bar
+		// Clear title bar and notification bar
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 
-		//mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		// Restore preferences
+		//restoreState();
 
+		// Check for a network connection
 		mConnectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-		//initNetworkNotify();
 
-		//SurfaceView view = new SurfaceView(this);
-		//cameraFacade = new CameraFacade(this.getApplicationContext(), view.getHolder(), mHandler);
-		//setContentView(view);
-		
-		mPreview = new CameraFacade(this, mHandler);
-        setContentView(mPreview);
-
-		//Restore preferences
-		restoreState();
-
-		//Initialize gesture detector
-		gestureScanner = new GestureDetector(new NavigationGestureHandler());
-
-		//Initialize TTS engine and check for correct installation of TTS engine
+		// Initialize TTS engine and check for correct installation of TTS engine
 		Intent checkIntent = new Intent();
 		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-		startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+		startActivityForResult(checkIntent, ttsDataCheck);
+
+		// Initialize gesture detector
+		gestureScanner = new GestureDetector(new NavigationGestureHandler());
+
+		// Begin the camera
+		mPreview = new CameraFacade(this, mHandler);
+		setContentView(mPreview);
 	}
 
 	//Method that checks to make sure the TTS is initialized correctly
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == MY_DATA_CHECK_CODE) {
+		if (requestCode == ttsDataCheck) {
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				//Success, create the TTS instance
-				Log.d(TAG, "TTS engine check");
+				Log.d(TAG, "TTS engine is installed");
 				TTSHandler.getInstance().ttsSetContext(this, this.getResources());
 			} else {
 				//Missing data, install it
@@ -109,81 +93,28 @@ public class MobileOCR extends Activity {
 		return gestureScanner.onTouchEvent(event);
 	}
 
-	/*
-	//Check to see if network connection exists
-	private final BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver () {
-		public void onReceive(Context context, Intent intent) {
-			Log.d(TAG, "Connectivity action broadcast");
-			networkNotify();
-		}
-	};
-
-	//Initial network checking. Similar to networkNotify() except this function
-	//is not hooked to a network receiver
-	private void initNetworkNotify() {
+	// Returns true if there is no network
+	public static boolean initNetworkNotify() {
 		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
-		if (netInfo == null) {
-			long[] pattern = {200, 200, 200};
-			mVibrator.vibrate(pattern, 0);
-		}
-		else {
-			mVibrator.vibrate(200);
-		}
-	}
-	
-
-	//Provide network availability feedback to user using vibration. 
-	//It notifies the user if the network has been lost while MobileOCR is running
-	private void networkNotify() {
-		NetworkInfo netInfo = mConnectivityManager.getActiveNetworkInfo();
-		if (netInfo == null) {
-			if (mIsNotified) {
-				long[] pattern = {200, 200, 200};
-				mVibrator.vibrate(pattern, 0);
-				mIsNotified = false;
-			}
-		} else {
-			int netType = netInfo.getType();
-			if (!mIsNotified) {
-				switch (netType) {
-				case ConnectivityManager.TYPE_WIFI:
-					mVibrator.vibrate(200);
-					break;
-				case ConnectivityManager.TYPE_MOBILE:
-					mVibrator.vibrate(200 );
-					break;
-				default:
-
-					break;
-				}
-				this.mIsNotified = true;
-			}
-		}
-	}
-	*/
-
-	//Initializes the OCRThread
-	private void startOCRThread () {
-		assert(mOCRThread == null);
-		mOCRThread = new OCRThread(mHandler);
-		mOCRThread.start();
+		return netInfo == null;
 	}
 
 	protected void onResume() {
 		Log.d(TAG, "onResume");
 		super.onResume();
-		startOCRThread();
-		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		//IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 		//registerReceiver(mConnectivityReceiver, filter, null, mHandler);
 		//cameraFacade.onResume();
+
+		if (MobileOCR.initNetworkNotify())
+			TTSHandler.ttsQueueMessage(R.string.tts_no_network);
 	}
 
 	protected void onPause() {
 		Log.d(TAG, "onPause");
 		super.onPause();
 		//unregisterReceiver(mConnectivityReceiver);
-		this.mIsNotified = false;
-		
+
 		//Store preferences
 		SharedPreferences state = getPreferences(Activity.MODE_PRIVATE);
 		SharedPreferences.Editor editor = state.edit();
@@ -212,39 +143,24 @@ public class MobileOCR extends Activity {
 		}
 	}
 
-	//Creates an intent to start ScreenReader Activity
-	private void startScreenReaderView(String result) {
-		Intent i = new Intent(this, ScreenReader.class);
-		i.putExtra("resultString", result);
-		startActivity (i);
-	}
-
+	/*
 	//Restore preferences
 	private void restoreState() {
 		SharedPreferences settings = getPreferences(Activity.MODE_PRIVATE);
 		Boolean toggleInstruction = settings.getBoolean(INSTRUCTION_KEY, true);
 		instructionFlag = toggleInstruction;
 	}
+	 */
 
 	//Message handler on navigation activity
 	private final Handler mHandler = new Handler () {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case R.id.msg_camera_auto_focus:
-				int status = msg.arg1;
-				//cameraFacade.clearAutoFocus();
-				//if (status == CameraFacade.AUTOFOCUS_SUCCESS) {
-				//mPreview.takePicture();
-				//}
-				break;
-			case R.id.msg_camera_preview_frame:
-				Handler ocrHandler = mOCRThread.getHandler();
-				//Message preprocessMsg = ocrHandler.obtainMessage(R.id.msg_ocr_recognize, width, height, msg.obj);
-				//ocrHandler.sendMessage(preprocessMsg);
-				break;
 			case R.id.msg_ocr_success:
 				//cameraFacade.onPause();
-				startScreenReaderView((String)msg.obj);
+				Intent i = new Intent(MobileOCR.this, ScreenReader.class);
+				i.putExtra("resultString", (String)msg.obj);
+				startActivity (i);
 				break;
 			case R.id.msg_ocr_fail:
 				//cameraFacade.startPreview();
