@@ -13,6 +13,9 @@ package mobileocr.main;
  * TODO: OnPause saves the current state of the screen reader
  */
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import mobileocr.gestures.ScreenReaderGestureHandler;
 import mobileocr.tts.TTSHandler;
 import mobileocr.main.R;
@@ -58,6 +61,18 @@ public class ScreenReader extends Activity {
 			//Check to see if the text file is empty
 			if (cleanedPassedString.equals("[ ]+") || cleanedPassedString.equals(""))
 				passedString = "There are no OCR results";
+			else {
+				// output = input.replaceAll([^\\p{ASCII}], "");
+				int badCharCount = 0;
+				String subString = passedString.substring(0, Math.min(passedString.length(), 50));
+				for (int i = 0; i < subString.length(); i++) {
+					if (subString.charAt(i) > '~')
+						badCharCount++;
+				}
+				Log.e(TAG, "Bad Chars = " + badCharCount);
+				if (badCharCount > 8)
+					passedString = "The OCR results had a lot of errors, please retake the image!";
+			}
 			sentenceArray = TextParser.sentenceParse(passedString);
 			wordArray = TextParser.wordParse(sentenceArray);
 			wordsInSentences = TextParser.countWordsInSentence(sentenceArray);
