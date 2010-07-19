@@ -17,6 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import mobileocr.tts.TTSHandler;
+
 import android.util.Log;
 
 /*
@@ -97,11 +99,11 @@ public class DoServerOCR {
 		}
 		catch (MalformedURLException ex) {
 			Log.e(TAG, "MalformedURLException: " + ex.getMessage(), ex);
-			responseFromServer = "EC#1";
+			responseFromServer = "There was an error in talking to the Mobile OCR servers, please try again or wait for the server to become available.";
 		}
 		catch (IOException ioe) {
 			Log.e(TAG, "IOException: " + ioe.getMessage(), ioe);
-			responseFromServer = "EC#1";
+			responseFromServer = "There was an error in connecting to the WeOCR servers, please try again or wait for the server to become available.";
 		}
 
 		//Read the server response
@@ -115,7 +117,7 @@ public class DoServerOCR {
 		}
 		catch (IOException ioex) {
 			Log.e(TAG, "IOException: " + ioex.getMessage(), ioex);
-			responseFromServer = "EC#1";
+			responseFromServer = "There was an error in connecting to the WeOCR servers, please try again or wait for the server to become available.";
 		}
 
 		Log.i(TAG,"Server Response: " + responseFromServer.trim());

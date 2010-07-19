@@ -1,4 +1,3 @@
-
 package mobileocr.main;
 
 /**

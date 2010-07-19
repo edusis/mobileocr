@@ -138,6 +138,7 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 		public void onShutter() {
 			// Play a shutter sound
 			mMediaPlayer.start();
+			TTSHandler.ttsQueueMessage(R.string.process_message);
 		}
 	};
 
@@ -169,7 +170,6 @@ public class CameraFacade extends SurfaceView implements SurfaceHolder.Callback 
 				Log.e(TAG, "Exception: " + e.getMessage(), e);
 			}
 			 */
-			
 			
 			String ocrResult = DoServerOCR.getOCRResponse(data);
 
