@@ -5,4 +5,8 @@
     <string name="tts_no_network">Welcome to Mobile OCR. Please make sure you can connect to the internet.</string>
     <string name="tts_sr_instruction">Fling up or down to change modes. Tap to play or pause current text. Fling left and right to navigate text. Double tap to play continuously. Tap and hold to repeat the instructions</string>
 	<string name="tts_nav_instruction">Currently in picture taking mode. Use the camera to take a picture.</string>
+	<string name="process_message">Processing image, please wait.</string>
+	
+	<string name="io_exception">There was an error in connecting to the WeOCR servers. Please try again or wait for the server to become available.</string>
+	<string name="malformed_exception">There was an error in talking to the Mobile OCR servers. Please try again or wait for the server to become available.</string>
 </resources>
