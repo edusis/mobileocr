@@ -17,8 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import mobileocr.tts.TTSHandler;
-
 import android.util.Log;
 
 /*
