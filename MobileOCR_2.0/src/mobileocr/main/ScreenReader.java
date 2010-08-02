@@ -13,9 +13,6 @@ package mobileocr.main;
  * TODO: OnPause saves the current state of the screen reader
  */
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import mobileocr.gestures.ScreenReaderGestureHandler;
 import mobileocr.tts.TTSHandler;
 import mobileocr.main.R;
@@ -53,14 +50,14 @@ public class ScreenReader extends Activity {
 		
 		//Check to see if we already parsed the given text (wouldn't want to do it twice)
 		if (passedString == null || !passedString.equals(extras.getString("resultString"))) {
-			passedString = extras != null ? extras.getString("resultString"): "Error: The string is not correct";
+			passedString = extras != null ? extras.getString("resultString"): "The text string has been lost!";
 			//passedString = passedString.replaceAll("\\s+", "");
 			//passedString = passedString.replaceAll("[.?!]+\\n", "\\n");
 			String cleanedPassedString = passedString.replaceAll("\\n+|\\t+|\\s+", "");
 			
 			//Check to see if the text file is empty
 			if (cleanedPassedString.equals("[ ]+") || cleanedPassedString.equals(""))
-				passedString = "There are no OCR results";
+				passedString = "The OCR message was blank, please retake the image!";
 			else {
 				// output = input.replaceAll([^\\p{ASCII}], "");
 				int badCharCount = 0;
