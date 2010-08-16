@@ -43,8 +43,7 @@ public class DoServerOCR {
 		String twoHyphens = "--";
 		String boundary =  "*****";
 		String responseFromServer = "";
-		String urlString = "http://abstract.cs.washington.edu/~koemon/mobileocr/upload.php";
-		//String urlString = "http://mobileocr.cs.washington.edu/process/upload.php";
+		String urlString = "http://mobileocr.cs.washington.edu/process/upload.php";
 
 		try {
 			Log.i(TAG,"Beginning client request");
@@ -101,7 +100,7 @@ public class DoServerOCR {
 		}
 		catch (IOException ioe) {
 			Log.e(TAG, "IOException: " + ioe.getMessage(), ioe);
-			responseFromServer = "There was an error in connecting to the WeOCR servers, please try again or wait for the server to become available.";
+			responseFromServer = "There was an error in connecting to the Mobile OCR servers, please try again or wait for the server to become available.";
 		}
 
 		//Read the server response
@@ -115,7 +114,7 @@ public class DoServerOCR {
 		}
 		catch (IOException ioex) {
 			Log.e(TAG, "IOException: " + ioex.getMessage(), ioex);
-			responseFromServer = "There was an error in connecting to the WeOCR servers, please try again or wait for the server to become available.";
+			responseFromServer = "There was an error in connecting to the Mobile OCR servers, please try again or wait for the server to become available.";
 		}
 
 		Log.i(TAG,"Server Response: " + responseFromServer.trim());
